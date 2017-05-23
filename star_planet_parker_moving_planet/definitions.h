@@ -1,0 +1,68 @@
+#define  PHYSICS                 MHD
+#define  DIMENSIONS              3
+#define  COMPONENTS              3
+#define  GEOMETRY                CARTESIAN
+#define  BODY_FORCE              VECTOR
+#define  COOLING                 NO
+#define  RECONSTRUCTION          PARABOLIC
+#define  TIME_STEPPING           CHARACTERISTIC_TRACING
+#define  DIMENSIONAL_SPLITTING   NO
+#define  NTRACER                 0
+#define  USER_DEF_PARAMETERS     11
+
+/* -- physics dependent declarations -- */
+
+#define  EOS                     IDEAL
+#define  ENTROPY_SWITCH          NO
+#define  DIVB_CONTROL            DIV_CLEANING
+#define  BACKGROUND_FIELD        NO
+#define  RESISTIVITY             NO
+#define  THERMAL_CONDUCTION      NO
+#define  VISCOSITY               NO
+#define  ROTATING_FRAME          NO
+
+/* -- user-defined parameters (labels) -- */
+
+#define  seperation              0
+#define  planet_temperature      1
+#define  planet_mass             2
+#define  planet_radius           3
+#define  planet_Bfield           4
+#define  planet_surface_rho      5
+#define  star_temperature        6
+#define  star_mass               7
+#define  star_radius             8
+#define  star_Bfield             9
+#define  star_surface_rho        10
+
+/* [Beg] user-defined constants (do not change this line) */
+
+#define  UNIT_DENSITY            1.0e-15
+#define  UNIT_LENGTH             6.955e+10
+#define  UNIT_VELOCITY           1.0e5
+#define  t0                      (UNIT_LENGTH/UNIT_VELOCITY)
+#define  UNIT_G                  (CONST_G*UNIT_DENSITY*pow(t0,2))
+#define  M0                      (UNIT_DENSITY*pow(UNIT_LENGTH,3))
+#define  Bc                      (sqrt(4.0*CONST_PI*UNIT_DENSITY*UNIT_VELOCITY*UNIT_VELOCITY))
+#define  tyear                   3.15569e+7
+#define  tday                    8.64e+4
+#define  VTK_TIME_INFO           YES
+#define  VTK_VECTOR_DUMP         YES
+#define  GLM_EXTENDED            NO
+#define  CHOMBO_REF_VAR          RHO
+#define  PPM_ORDER               4
+#define  SHOW_TIME_STEPS         NO
+#define  CAK                     NO
+
+/* [End] user-defined constants (do not change this line) */
+
+/* -- supplementary constants (user editable) -- */ 
+
+#define  INITIAL_SMOOTHING         NO
+#define  WARNING_MESSAGES          NO
+#define  PRINT_TO_FILE             YES
+#define  INTERNAL_BOUNDARY         YES
+#define  SHOCK_FLATTENING          NO
+#define  CHAR_LIMITING             NO
+#define  LIMITER                   VANLEER_LIM
+#define  ASSIGN_VECTOR_POTENTIAL   NO
