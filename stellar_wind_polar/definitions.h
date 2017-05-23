@@ -4,8 +4,8 @@
 #define  GEOMETRY                SPHERICAL
 #define  BODY_FORCE              VECTOR
 #define  COOLING                 POWER_LAW
-#define  RECONSTRUCTION          LINEAR
-#define  TIME_STEPPING           RK2
+#define  RECONSTRUCTION          PARABOLIC
+#define  TIME_STEPPING           RK3
 #define  DIMENSIONAL_SPLITTING   NO
 #define  NTRACER                 0
 #define  USER_DEF_PARAMETERS     11
@@ -67,3 +67,4 @@
 #define  CHAR_LIMITING             NO
 #define  LIMITER                   VANLEER_LIM
 #define  ASSIGN_VECTOR_POTENTIAL   NO
+#define  UPDATE_VECTOR_POTENTIAL   NO

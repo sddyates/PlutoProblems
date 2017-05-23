@@ -156,9 +156,12 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
          theta  = 0.0;
 /*================================================================================*/
  
-  #if EOS == IDEAL
+#if EOS == IDEAL
   g_gamma = 1.05;
-  #endif
+#endif
+#if PHYSICS == MHD   
+  beta *= 0.0174532925;
+#endif
 
   if(side == X1_BEG){BOX_LOOP(box,k,j,i){                           
 
@@ -172,7 +175,6 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
     //printf("rho=%e, prs=%e \n", rho[k][j][i], prs[k][j][i]);
 
 #if PHYSICS == MHD   
-    beta *= 0.0174532925;
     x = x1[i]*sin(x2[j])*cos(x3[k]);
     y = x1[i]*sin(x2[j])*sin(x3[k]);
     z = x1[i]*cos(x2[j]);
