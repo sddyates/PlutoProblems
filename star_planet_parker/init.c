@@ -26,6 +26,7 @@ void Init (double *v, double x1, double x2, double x3)
     double Fcentr_s_x1, Fcentr_s_x2, Fcor_s_x1, Fcor_s_x2, Fin_s_x1, Fin_s_x2;
     double Fcentr_p_x1, Fcentr_p_x2, Fcor_p_x1, Fcor_p_x2, Fin_p_x1, Fin_p_x2;
     double function, dfunction, step, rcs, rcp;
+    double kb, mp;
 
     g_smallPressure = 1.0e-5; /**< Small value for pressure fix. */
 
@@ -48,8 +49,15 @@ void Init (double *v, double x1, double x2, double x3)
     RHs       = g_inputParam[star_surface_rho]/UNIT_DENSITY;                              
     v_escp    = sqrt(2.0*UNIT_G*Mp/Rp); /* - Planet escape speed - */
     v_escs    = sqrt(2.0*UNIT_G*Ms/Rs); /* - Star escape speed - */
-    csp       = sqrt((2.0*Tp)/KELVIN); /* - Stellar sound speed at base - */
-    css       = sqrt((2.0*Ts)/KELVIN); /* - Planet sound speed at base - */
+    //csp       = sqrt((2.0*Tp)/KELVIN); /* - Stellar sound speed at base - */
+    //css       = sqrt((2.0*Ts)/KELVIN); /* - Planet sound speed at base - */
+
+    kb        = 1.38064852e-16; /* [erg K-1] */
+    mp        = 1.67262171e-24; /* [g] */
+
+    csp       = sqrt((2.0*kb*Tp)/mp)/UNIT_VELOCITY;
+    css       = sqrt((2.0*kb*Ts)/mp)/UNIT_VELOCITY;
+
     omega_orb = sqrt(UNIT_G*Ms/pow(a,3));
     omegas    = omega_orb;      
     omegap    = omega_orb;
@@ -129,7 +137,12 @@ void Init (double *v, double x1, double x2, double x3)
                v[VX3] = v_wp_x3;)
         v[PRS] = PRSp;
         v[RHO] = RHOp;
+
+
     }
+        if (rp <= 1.0*Rp){
+          printf("1, rp=%e, v[RHO]=%e, v[PRS]=%e, v_wp=%e, v_mag=%e \n",rp, v[RHO], v[PRS], v_wp, sqrt(v[VX1]*v[VX1]+v[VX2]*v[VX2]+v[VX3]*v[VX3]));
+        }
 
     /* - Set the density, pressure, velocity of the stellar wind 
          and stellar interiar. - */
@@ -269,6 +282,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
     double Fcentr_p_x1, Fcentr_p_x2, Fcor_p_x1, Fcor_p_x2, Fin_p_x1, Fin_p_x2;
     double function, dfunction, step, rcs, rcp; 
     double v_ws_x1, v_ws_x2, v_ws_x3, v_wp_x1, v_wp_x2, v_wp_x3;
+    double kb, mp;
  
     /* - quantity | value | units - */
     /* - adiabatic index - */
@@ -288,8 +302,15 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
     RHs       = g_inputParam[star_surface_rho]/UNIT_DENSITY;
     v_escp    = sqrt(2.0*UNIT_G*Mp/Rp); /* - Planet escape speed - */
     v_escs    = sqrt(2.0*UNIT_G*Ms/Rs); /* - Star escape speed - */
-    csp       = sqrt((2.0*Tp)/KELVIN); /* - Stellar sound speed at base - */
-    css       = sqrt((2.0*Ts)/KELVIN); /* - Planet sound speed at base - */
+    //csp       = sqrt((2.0*Tp)/KELVIN); /* - Stellar sound speed at base - */
+    //css       = sqrt((2.0*Ts)/KELVIN); /* - Planet sound speed at base - */
+
+    kb        = 1.38064852e-16; /* [erg K-1] */
+    mp        = 1.67262171e-24; /* [g] */
+
+    csp       = sqrt((2.0*kb*Tp)/mp)/UNIT_VELOCITY;
+    css       = sqrt((2.0*kb*Ts)/mp)/UNIT_VELOCITY;
+
     omega_orb = sqrt(UNIT_G*Ms/pow(a,3));
     omegas    = omega_orb;
     omegap    = omega_orb;
@@ -323,10 +344,15 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
             phip   = atan2(x2[j],(x1[i]-a));
             thetas = acos(x3[k]/rs);
             phis   = atan2(x2[j],x1[i]);
+                if (rp <= 1.0*Rp){
+                  printf("2.1, rp=%e, RHOp=%e, PRSp=%e, v_mag=%e \n", rp, d->Vc[RHO][k][j][i], d->Vc[PRS][k][j][i], sqrt(d->Vc[VX1][k][j][i]*d->Vc[VX1][k][j][i] + d->Vc[VX2][k][j][i]*d->Vc[VX2][k][j][i] + d->Vc[VX3][k][j][i]*d->Vc[VX3][k][j][i]));
+                }
 
             // - Set the density, pressure, velocity of the stellar wind and planetary interiar.
             if (rp <= Rp){
+
                 d->flag[k][j][i] |= FLAG_INTERNAL_BOUNDARY;
+
             } else if (rp > Rp && rp <= 1.5*Rp){
 
                 // Newton raphson method planet 
@@ -365,12 +391,19 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
                        d->Vc[VX3][k][j][i] = v_wp_x3;) 
                 d->Vc[PRS][k][j][i] = PRSp;
                 d->Vc[RHO][k][j][i] = RHOp;
+
+
             }
+                if (rp <= 1.0*Rp){
+                  printf("2.2, rp=%e, RHOp=%e, PRSp=%e, v_mag=%e \n", rp, d->Vc[RHO][k][j][i], d->Vc[PRS][k][j][i], sqrt(d->Vc[VX1][k][j][i]*d->Vc[VX1][k][j][i] + d->Vc[VX2][k][j][i]*d->Vc[VX2][k][j][i] + d->Vc[VX3][k][j][i]*d->Vc[VX3][k][j][i]));
+                }
 
             /* - Set the density, pressure, velocity of the stellar wind 
                  and stellar interiar. - */
             if(rs <= Rs){
+
                 d->flag[k][j][i] |= FLAG_INTERNAL_BOUNDARY;
+
             } else if (rs > Rs && rs <= 1.5*Rs){
                 // Newton raphson method Star
                 lambas = 0.5*pow(v_escs/css,2);
