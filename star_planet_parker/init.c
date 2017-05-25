@@ -17,8 +17,6 @@
 void ParkerVelocity(double *parker, double cs, double v_esc, double r, 
                     double rc, double R, double RH, double P);
 
-
-
 void Init (double *v, double x1, double x2, double x3)
 {
 
@@ -28,7 +26,7 @@ void Init (double *v, double x1, double x2, double x3)
   double rp2, rp, rs, rs2, thetas, phis, thetap, phip;
   double Ms, B0s, vs, M_dots, M_dotp, Ts, Tp, omega_orb;
   double Ps, Pp, RHs, RHp, rcs, rcp;
-  double kb, mp;
+  double kb, mp, sphere;
   double parker[3];
 
   // quantity | value | units
@@ -90,6 +88,7 @@ void Init (double *v, double x1, double x2, double x3)
   rcs = UNIT_G*Ms/(2.0*css*css);
   rcp = UNIT_G*Mp/(2.0*csp*csp);
 
+  sphere = 1.5;
 
   // Set the density, pressure, velocity of the stellar wind 
   // and planetary interiar.
@@ -101,7 +100,7 @@ void Init (double *v, double x1, double x2, double x3)
     v[PRS] = Pp + (2.0/3.0)*CONST_PI*UNIT_G*RHp*RHp*(Rp*Rp-rp*rp);
     v[RHO] = RHp;
 
-  } else if (rp > Rp && rp <= 10.0*Rp) {
+  } else if (rp > Rp && rp <= sphere*Rp) {
 
     ParkerVelocity(parker, csp, v_escp, rp, rcp, Rp, RHp, Pp);
     EXPAND(v[VX1] = sin(thetap)*(parker[0]*cos(phip)+sin(phis)*rs*omega_fr-sin(phip)*rp*omegap);,
@@ -121,7 +120,7 @@ void Init (double *v, double x1, double x2, double x3)
     v[PRS] = Ps + (2.0/3.0)*CONST_PI*UNIT_G*RHs*RHs*(Rs*Rs-rs*rs);
     v[RHO] = RHs;
 
-  } else if (rs > Rs && rp > 10.0*Rp){
+  } else if (rs > Rs && rp > sphere*Rp){
 
     ParkerVelocity(parker, css, v_escs, rs, rcs, Rs, RHs, Ps);
     EXPAND(v[VX1] = sin(thetas)*(parker[0]*cos(phis)+sin(phis)*rs*(omega_fr+omegas));,
@@ -154,13 +153,13 @@ void Init (double *v, double x1, double x2, double x3)
            v[BX2] = 0.0;,
            v[BX3] = 16.0*B0p;) 
 
-  } else if (rp > 0.5*Rp && rp <= 10.0*Rp) {
+  } else if (rp > 0.5*Rp && rp <= sphere*Rp) {
 
     EXPAND(v[BX1] = 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);,
            v[BX2] = 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);,
            v[BX3] = (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);)
 
-  } else if (rs > 1.0*Rs && rp > 10.0*Rp) {
+  } else if (rs > 1.0*Rs && rp > sphere*Rp) {
 
     EXPAND(v[BX1] = 3.0*x1*x3*B0s*pow(Rs, 3)*pow(rs, -5) + 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);,
            v[BX2] = 3.0*x3*x2*B0s*pow(Rs, 3)*pow(rs, -5) + 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);,
@@ -300,7 +299,6 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
 
   if (side == 0) {
     TOT_LOOP(k,j,i){	
-
 
       /* - Radial quantities - */
       rs2 = EXPAND(x1[i]*x1[i],+x2[j]*x2[j],+x3[k]*x3[k]);

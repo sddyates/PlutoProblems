@@ -20,147 +20,130 @@
 */                                                                                  
 void Init (double *v, double x1, double x2, double x3){
 /*================================================================================*/
- double Mratio    = g_inputParam[M_RATIO],                                          
-        Lratio    = g_inputParam[L_RATIO],                                          
-        Bcgs      = g_inputParam[B_CGS],                                            
-        T         = g_inputParam[TT],                                               
-        mu        = g_inputParam[MU],                                               
-        a         = g_inputParam[AA],                                              
-        b         = g_inputParam[Bb],                                               
-        Q         = g_inputParam[QQ],                                               
-        a_eff     = g_inputParam[aa_eff],                                           
-        M_star    = (Mratio*CONST_Msun/UNIT_MASS),                                  
-        Edd       = (2.6e-5*(Lratio)*(1.0/Mratio)),                                 
-        L         = (Lratio*L_sun/UNIT_L),                                          
-        c         = 3.0e+5,                                                         
-        M_dot     = pow(1.0+a_eff,-(1.0/a_eff)) * a_eff * pow(1.0-a_eff,-1)*
-                    (L/(c*c))*pow(((Q*Edd)*pow(1.0-Edd,-1)),pow(a_eff,-1)-1.0),   
-        cs        = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu)),            
-        Bq        = Bcgs/UNIT_B,                                                    
-        v_esc     = sqrt(2.0*UNIT_G*M_star*(1.0-Edd)),                              
-        v_inf     = v_esc * sqrt((a/(1.0-a))),                                      
-        vv        = v_inf*pow(1.0-(1.0/x1),b),                                      
-        beta      = g_inputParam[BB],
-        x         = 0.0,
-        y         = 0.0,
-        z         = 0.0,
-        xp        = 0.0,
-        yp        = 0.0,
-        zp        = 0.0,
-        r         = 0.0,
-        theta     = 0.0;
-/*================================================================================*/
- g_smallPressure = (v[RHO])*T/(KELVIN*mu); /**< Small value for pressure fix. */
- #if EOS == IDEAL
- g_gamma = 1.05;
- #endif
- #if EOS == ISOTHERMAL                                                  
- g_isoSoundSpeed = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu));
- #endif
- if(isnan(-vv) || isnan(vv)){vv = 0.00518*v_inf;}                                   
- #if ROTATING_FRAME == YES                                                          
- g_OmegaZ = (0.5*sqrt((8.0*UNIT_G*M_star)/27.0));                                  
- #endif                                                                             
- #if EOS == ISOTHERMAL                                                              
- v[RHO] = (M_dot/(4.0*CONST_PI*vv*x1*x1));                                         
- #endif                                                                             
- #if EOS == IDEAL                                                              
- v[RHO] = (M_dot/(4.0*CONST_PI*vv*x1*x1));                                         
- v[PRS] = (v[RHO]*T/(KELVIN*mu));                                                  
- #endif                                                               
- EXPAND(v[VX1] = vv;,                                                 
+  double Mratio, Lratio, Bcgs, T, mu, a, b, Q, a_eff, M_star, Edd;
+  double L, c, M_dot, cs, Bq, v_esc, v_inf, vv, beta;
+  double x, y, z, xp, yp, zp, r, theta;
+
+  Mratio    = g_inputParam[M_RATIO];
+  Lratio    = g_inputParam[L_RATIO];
+  Bcgs      = g_inputParam[B_CGS];
+  T         = g_inputParam[TT];
+  mu        = g_inputParam[MU];
+  a         = g_inputParam[AA];
+  b         = g_inputParam[Bb];
+  Q         = g_inputParam[QQ];
+  a_eff     = g_inputParam[aa_eff];
+  M_star    = (Mratio*CONST_Msun/UNIT_MASS);
+  Edd       = (2.6e-5*(Lratio)*(1.0/Mratio));
+  L         = (Lratio*L_sun/UNIT_L);
+  c         = 3.0e+5;
+  M_dot     = pow(1.0+a_eff,-(1.0/a_eff)) * a_eff * pow(1.0-a_eff,-1)*
+              (L/(c*c))*pow(((Q*Edd)*pow(1.0-Edd,-1)),pow(a_eff,-1)-1.0);
+  cs        = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu));
+  Bq        = Bcgs/UNIT_B;
+  v_esc     = sqrt(2.0*UNIT_G*M_star*(1.0-Edd));                              
+  v_inf     = v_esc * sqrt((a/(1.0-a)));                                      
+  vv        = v_inf*pow(1.0-(1.0/x1),b);                                      
+  beta      = g_inputParam[BB];
+
+  g_smallPressure = (v[RHO])*T/(KELVIN*mu); /**< Small value for pressure fix. */
+#if EOS == IDEAL
+  g_gamma = 1.05;
+#endif
+#if EOS == ISOTHERMAL                                                  
+  g_isoSoundSpeed = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu));
+#endif
+  if(isnan(-vv) || isnan(vv)){vv = 0.00518*v_inf;}                                   
+#if ROTATING_FRAME == YES                                                          
+  g_OmegaZ = (0.5*sqrt((8.0*UNIT_G*M_star)/27.0));                                  
+#endif                                                                             
+#if EOS == ISOTHERMAL                                                              
+  v[RHO] = (M_dot/(4.0*CONST_PI*vv*x1*x1));                                         
+#endif                                                                             
+#if EOS == IDEAL                                                              
+  v[RHO] = (M_dot/(4.0*CONST_PI*vv*x1*x1));                                         
+  v[PRS] = (v[RHO]*T/(KELVIN*mu));                                                  
+#endif                                                               
+  EXPAND(v[VX1] = vv;,                                                 
         v[VX2] = 0.0;,                               
         v[VX3] = 0.0;)                 
- v[TRC] = 0.0;                                                                     
- #if PHYSICS == MHD                                   
- beta *= 0.0174532925;
- x = x1*sin(x2)*cos(x3);
- y = x1*sin(x2)*sin(x3);
- z = x1*cos(x2);
- xp = x*cos(beta) - z*sin(beta);
- yp = y;
- zp = x*sin(beta) + z*cos(beta);
- r = sqrt(xp*xp + yp*yp + zp*zp);
- theta = acos(zp/r);
- EXPAND(v[BX1] = Bq*pow(r,-3)*cos(theta);,            
-        v[BX2] = (Bq/2.)*pow(r,-3)*sin(theta);,                 
-        v[BX3] = 0.0;)                                                   
- #endif                                                                    
+  v[TRC] = 0.0;                                                                     
+#if PHYSICS == MHD                                   
+  beta *= 0.0174532925;
+  x = x1*sin(x2)*cos(x3);
+  y = x1*sin(x2)*sin(x3);
+  z = x1*cos(x2);
+  xp = x*cos(beta) - z*sin(beta);
+  yp = y;
+  zp = x*sin(beta) + z*cos(beta);
+  r = sqrt(xp*xp + yp*yp + zp*zp);
+  theta = acos(zp/r);
+  EXPAND(v[BX1] = Bq*pow(r,-3)*cos(theta);,            
+         v[BX2] = (Bq/2.)*pow(r,-3)*sin(theta);,                 
+         v[BX3] = 0.0;)                                                   
+#endif                                                                    
+
 }                                                                          
+
 /*================================================================================*/
-void Analysis (const Data *d, Grid *grid){}                               
+void Analysis (const Data *d, Grid *grid)
+{
+}
 /*================================================================================*/
+
 void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {        
 /*================================================================================*/
   int i, j, k, ip, kp, jp;
 
-  double Cs_p   = g_inputParam[Cs_P],
-         Mratio = g_inputParam[M_RATIO],
-         Lratio = g_inputParam[L_RATIO],
-         T      = g_inputParam[TT],
-         mu     = g_inputParam[MU],
-         a      = g_inputParam[AA],
-         b      = g_inputParam[Bb],
-         Q      = g_inputParam[QQ],
-         a_eff  = g_inputParam[aa_eff],
-         M_star = (Mratio*CONST_Msun/UNIT_MASS),
-         Edd    = (2.6e-5*(Lratio)*(1.0/Mratio)),
-         L      = (Lratio*L_sun/UNIT_L),
-         c      = 3.0e+5,
-         M_dot  = pow(1.0+a_eff,-(1.0/a_eff)) * a_eff * pow(1.0-a_eff,-1)*
-                  (L*pow(c,-2))*pow(((Q*Edd)*pow(1.0-Edd,-1)),pow(a_eff,-1)-1.0),
-         ke     = ((4.0*CONST_PI*UNIT_G*M_star*c*Edd)/L),
-         Omega2 = pow(0.5,2)*(8.0/27.0)*UNIT_G*M_star,
-         A      = ((1.0/(1.0-a))*((ke*L*Q)/(4.0*CONST_PI*c))),
-         *x1    = grid[IDIR].x,                                                  
-         *x2    = grid[JDIR].x,                                                  
-         *x3    = grid[KDIR].x,
-         *dx1   = grid[IDIR].dx,
-         *dx2   = grid[JDIR].dx,
-         *dx3   = grid[KDIR].dx,
-         ***vx1 = d->Vc[VX1],
-         ***vx2 = d->Vc[VX2],                                                  
-         ***vx3 = d->Vc[VX3],
-         ***rho = d->Vc[RHO],
-          ***prs = d->Vc[PRS],
-         #if PHYSICS == MHD
-         ***bx1 = d->Vc[BX1],
-         ***bx2 = d->Vc[BX2],
-         ***bx3 = d->Vc[BX3],
-         #endif
-         Bcgs   = g_inputParam[B_CGS],                                        
-         cs     = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu)),       
-         Bq     = Bcgs/UNIT_B,                                                    
-         #if EOS == ISOTHERMAL                                                  
-         g_isoSoundSpeed = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu)),
-          #endif       
-         dvdx1 = 0.0,
-         dvdx12  = 0.0,
-         nu2_c  = 0.0,
-         B      = 0.0,
-         sigma  = 0.0,
-         f      = 0.0,
-         gLx1   = 0.0,
-         gLx2   = 0.0,
-         gcx1   = 0.0,
-         gcx2   = 0.0,
-         gg     = 0.0,
-         beta   = g_inputParam[BB],
-         x      = 0.0,
-         y      = 0.0,
-         z      = 0.0,
-         xp     = 0.0,
-         yp     = 0.0,
-         zp     = 0.0,
-         r      = 0.0,
-         theta  = 0.0;
-/*================================================================================*/
- 
+  double Cs_p, Mratio, Lratio, T, mu, a, b, Q, a_eff, M_star, Edd;
+  double L, c, M_dot, ke, Omega2, A, Bcgs, cs, bq, dvdx1, dvdx12;
+  double nu2_c, B, sigma, f, gLx1, gLx2, gcx1, gcx2, gg, beta;
+  double x, y, z, xp, yp, zp, r, theta;
+
+  double *x1    = grid[IDIR].x;                                                  
+  double  *x2    = grid[JDIR].x;                                                  
+  double  *x3    = grid[KDIR].x;
+  double  *dx1   = grid[IDIR].dx;
+  double  *dx2   = grid[JDIR].dx;
+  double  *dx3   = grid[KDIR].dx;
+  double  ***vx1 = d->Vc[VX1];
+  double  ***vx2 = d->Vc[VX2];                                                  
+  double  ***vx3 = d->Vc[VX3];
+  double  ***rho = d->Vc[RHO];
+  double  ***prs = d->Vc[PRS];
+#if PHYSICS == MHD
+  double  ***bx1 = d->Vc[BX1];
+  double  ***bx2 = d->Vc[BX2];
+  double  ***bx3 = d->Vc[BX3];
+#endif
+
+  Cs_p   = g_inputParam[Cs_P];
+  Mratio = g_inputParam[M_RATIO];
+  Lratio = g_inputParam[L_RATIO];
+  T      = g_inputParam[TT];
+  mu     = g_inputParam[MU];
+  a      = g_inputParam[AA];
+  b      = g_inputParam[Bb];
+  Q      = g_inputParam[QQ];
+  a_eff  = g_inputParam[aa_eff];
+  M_star = (Mratio*CONST_Msun/UNIT_MASS);
+  Edd    = (2.6e-5*(Lratio)*(1.0/Mratio));
+  L      = (Lratio*L_sun/UNIT_L);
+  c      = 3.0e+5;
+  M_dot  = pow(1.0+a_eff,-(1.0/a_eff)) * a_eff * pow(1.0-a_eff,-1)*
+           (L*pow(c,-2))*pow(((Q*Edd)*pow(1.0-Edd,-1)),pow(a_eff,-1)-1.0);
+  ke     = ((4.0*CONST_PI*UNIT_G*M_star*c*Edd)/L);
+  Omega2 = pow(0.5,2)*(8.0/27.0)*UNIT_G*M_star;
+  A      = ((1.0/(1.0-a))*((ke*L*Q)/(4.0*CONST_PI*c)));
+  Bcgs   = g_inputParam[B_CGS];
+  cs     = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu));
+  Bq     = Bcgs/UNIT_B;
+#if EOS == ISOTHERMAL                                                  
+  g_isoSoundSpeed = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu));
+#endif       
+  beta   = 0.0174532925*g_inputParam[BB];
 #if EOS == IDEAL
   g_gamma = 1.05;
-#endif
-#if PHYSICS == MHD   
-  beta *= 0.0174532925;
 #endif
 
   if(side == X1_BEG){BOX_LOOP(box,k,j,i){                           
@@ -249,16 +232,11 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
  #endif    
  }} 
 */
- if(side == 0){DOM_LOOP(k,j,i){
-   if (d->Vc[PRS][k][j][i] < (rho[k][j][i])*T/(KELVIN*mu)){
-/*
-    if (isnan(rho[k][j][i])){
-      printf("rho[k][j][i] = %e \n", rho[k][j][i]);
+  if(side == 0){DOM_LOOP(k,j,i){
+    if (d->Vc[PRS][k][j][i] < (rho[k][j][i])*T/(KELVIN*mu)){
+      d->Vc[PRS][k][j][i] = (rho[k][j][i])*T/(KELVIN*mu);
     }
-*/
-    d->Vc[PRS][k][j][i] = (rho[k][j][i])*T/(KELVIN*mu);
-   }
- }}
+  }}
 
 }                                                                          
 /*================================================================================*/
