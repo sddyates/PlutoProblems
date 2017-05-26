@@ -88,7 +88,7 @@ void Init (double *v, double x1, double x2, double x3)
   rcs = UNIT_G*Ms/(2.0*css*css);
   rcp = UNIT_G*Mp/(2.0*csp*csp);
 
-  sphere = 1.5;
+  sphere = 3.0;
 
   // Set the density, pressure, velocity of the stellar wind 
   // and planetary interiar.

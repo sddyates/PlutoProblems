@@ -5,7 +5,7 @@
 #define  BODY_FORCE              VECTOR
 #define  COOLING                 NO
 #define  RECONSTRUCTION          PARABOLIC
-#define  TIME_STEPPING           CHARACTERISTIC_TRACING
+#define  TIME_STEPPING           RK2
 #define  DIMENSIONAL_SPLITTING   NO
 #define  NTRACER                 0
 #define  USER_DEF_PARAMETERS     11
