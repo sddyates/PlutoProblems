@@ -88,7 +88,7 @@ void Init (double *v, double x1, double x2, double x3)
   rcs = UNIT_G*Ms/(2.0*css*css);
   rcp = UNIT_G*Mp/(2.0*csp*csp);
 
-  sphere = 3.0;
+  sphere = 10.0;
 
   // Set the density, pressure, velocity of the stellar wind 
   // and planetary interiar.
@@ -348,7 +348,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
                d->Vc[VX3][k][j][i] = parker[0]*cos(thetap);) 
         d->Vc[PRS][k][j][i] = parker[1];
         d->Vc[RHO][k][j][i] = parker[2];
-        d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
+        //d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
 
       }
 
@@ -388,7 +388,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
                d->Vc[VX3][k][j][i] = parker[0]*cos(thetas);)
         d->Vc[PRS][k][j][i] = parker[1];
         d->Vc[RHO][k][j][i] = parker[2];
-        d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
+        //d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
 
       }
 
