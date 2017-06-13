@@ -213,13 +213,13 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
     B0[1] = 0.0;
     B0[2] = 16.0*B0p;       
 
-  } else if (rp > 0.5*Rp && rp <= 1.0*Rp) {
+  } else if (rp > 0.5*Rp && rp <= 10.0*Rp) {
 
     B0[0] = 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);
     B0[1] = 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);
     B0[2] = (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);       
 
-  } else if (rs > 1.0*Rs && rp > 1.0*Rp) {
+  } else if (rs > 1.0*Rs && rp > 10.0*Rp) {
 
     B0[0] = 3.0*x1*x3*B0s*pow(Rs, 3)*pow(rs, -5) + 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);
     B0[1] = 3.0*x3*x2*B0s*pow(Rs, 3)*pow(rs, -5) + 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);
@@ -321,9 +321,18 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
                d->Vc[VX3][k][j][i] = 0.0;)
         d->Vc[PRS][k][j][i] = Pp + (2.0/3.0)*CONST_PI*UNIT_G*RHp*RHp*(Rp*Rp-rp*rp);
         d->Vc[RHO][k][j][i] = RHp;
+#if PHYSICS == MHD
+#if BACKGROUND_FIELD == NO
         EXPAND(d->Vc[BX1][k][j][i] = 0.0;,
                d->Vc[BX2][k][j][i] = 0.0;,
                d->Vc[BX3][k][j][i] = 16.0*B0p;) 
+#endif
+#if BACKGROUND_FIELD == YES
+        EXPAND(d->Vc[BX1][k][j][i] = 0.0;,
+               d->Vc[BX2][k][j][i] = 0.0;,
+               d->Vc[BX3][k][j][i] = 0.0;) 
+#endif
+#endif
         d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
 
       } else if (rp > 0.5*Rp && rp <= Rp) {
@@ -333,9 +342,18 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
                d->Vc[VX3][k][j][i] = 0.0;)
         d->Vc[PRS][k][j][i] = Pp + (2.0/3.0)*CONST_PI*UNIT_G*RHp*RHp*(Rp*Rp-rp*rp);
         d->Vc[RHO][k][j][i] = RHp;
+#if PHYSICS == MHD
+#if BACKGROUND_FIELD == NO
         EXPAND(d->Vc[BX1][k][j][i] = 3.0*(x1[i] - a)*x3[k]*B0p*pow(Rp, 3)*pow(rp, -5);,
                d->Vc[BX2][k][j][i] = 3.0*x3[k]*x2[j]*B0p*pow(Rp, 3)*pow(rp, -5);,
                d->Vc[BX3][k][j][i] = (3.0*x3[k]*x3[k] - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);)
+#endif
+#if BACKGROUND_FIELD == YES
+        EXPAND(d->Vc[BX1][k][j][i] = 0.0;,
+               d->Vc[BX2][k][j][i] = 0.0;,
+               d->Vc[BX3][k][j][i] = 0.0;) 
+#endif
+#endif
         d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
 
       } else if (rp > Rp && rp <= 1.5*Rp){
@@ -361,9 +379,18 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
                d->Vc[VX3][k][j][i] = 0.0;)
         d->Vc[PRS][k][j][i] = Ps + (2.0/3.0)*CONST_PI*UNIT_G*RHs*RHs*(Rs*Rs-rs*rs);
         d->Vc[RHO][k][j][i] = RHs;
+#if PHYSICS == MHD
+#if BACKGROUND_FIELD == NO
         EXPAND(d->Vc[BX1][k][j][i] = 0.0;,
                d->Vc[BX2][k][j][i] = 0.0;,
                d->Vc[BX3][k][j][i] = 16.0*B0s;)
+#endif
+#if BACKGROUND_FIELD == YES
+        EXPAND(d->Vc[BX1][k][j][i] = 0.0;,
+               d->Vc[BX2][k][j][i] = 0.0;,
+               d->Vc[BX3][k][j][i] = 0.0;) 
+#endif
+#endif
         d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
 
       } else if (rs > 0.5*Rs && rs <= Rs) {
@@ -373,9 +400,18 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
                d->Vc[VX3][k][j][i] = 0.0;)
         d->Vc[PRS][k][j][i] = Ps + (2.0/3.0)*CONST_PI*UNIT_G*RHs*RHs*(Rs*Rs-rs*rs);
         d->Vc[RHO][k][j][i] = RHs;
+#if PHYSICS == MHD
+#if BACKGROUND_FIELD == NO
         EXPAND(d->Vc[BX1][k][j][i] = 3.0*x1[i]*x3[k]*B0s*pow(Rs, 3)*pow(rs, -5);,
                d->Vc[BX2][k][j][i] = 3.0*x3[k]*x2[j]*B0s*pow(Rs, 3)*pow(rs, -5);,
                d->Vc[BX3][k][j][i] = (3.0*x3[k]*x3[k] - rs*rs)*B0s*pow(Rs, 3)*pow(rs, -5);)
+#endif
+#if BACKGROUND_FIELD == YES
+        EXPAND(d->Vc[BX1][k][j][i] = 0.0;,
+               d->Vc[BX2][k][j][i] = 0.0;,
+               d->Vc[BX3][k][j][i] = 0.0;) 
+#endif
+#endif
         d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
 
       } else if (rs > Rs && rs <= 1.5*Rs){
@@ -388,7 +424,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
                d->Vc[VX3][k][j][i] = parker[0]*cos(thetas);)
         d->Vc[PRS][k][j][i] = parker[1];
         d->Vc[RHO][k][j][i] = parker[2];
-        //d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
+        d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
 
       }
 
