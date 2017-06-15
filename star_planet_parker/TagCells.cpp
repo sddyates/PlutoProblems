@@ -246,7 +246,7 @@ void PatchPluto::computeRefGradient(FArrayBox& gFab, FArrayBox& UFab,
      rad_s = EXPAND(x1*x1, + x2*x2, +x3*x3);
      rad_s = sqrt(rad_s);
 
-
+     
      if (rad_p < 1.5*Rp) {
        grad[k][j][i] = 1.0;
      //} else if (rad_s < 0.5*Rs){
@@ -254,6 +254,9 @@ void PatchPluto::computeRefGradient(FArrayBox& gFab, FArrayBox& UFab,
      } else {
        grad[k][j][i] = sqrt(gr2);
      }
+     
+
+     //grad[k][j][i] = sqrt(gr2);
 
 
     #endif
