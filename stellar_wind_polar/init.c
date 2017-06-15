@@ -69,6 +69,7 @@ void Init (double *v, double x1, double x2, double x3){
         v[VX3] = 0.0;)                 
   v[TRC] = 0.0;                                                                     
 #if PHYSICS == MHD                                   
+#if BACKGROUND_FIELD == NO
   beta *= 0.0174532925;
   x = x1*sin(x2)*cos(x3);
   y = x1*sin(x2)*sin(x3);
@@ -81,7 +82,12 @@ void Init (double *v, double x1, double x2, double x3){
   EXPAND(v[BX1] = Bq*pow(r,-3)*cos(theta);,            
          v[BX2] = (Bq/2.)*pow(r,-3)*sin(theta);,                 
          v[BX3] = 0.0;)                                                   
-#endif                                                                    
+#endif
+#if BACKGROUND_FIELD == YES
+  v[BX1] = v[BX2] = v[BX3] =
+  v[AX1] = v[AX2] = v[AX3] = 0.0;
+#endif
+#endif
 
 }                                                                          
 
@@ -91,14 +97,45 @@ void Analysis (const Data *d, Grid *grid)
 }
 /*================================================================================*/
 
+/*================================================================================*/
+#if BACKGROUND_FIELD == YES
+void BackgroundField (double x1, double x2, double x3, double *B0)                                                    
+{                                                                                                                     
+
+  double Bq, Bcgs, beta, r;
+  double x, y, z;
+  double xp, yp, zp;
+  double theta;
+  Bcgs = g_inputParam[B_CGS];
+  Bq = Bcgs/UNIT_B;
+  beta = g_inputParam[BB];
+
+  beta *= 0.0174532925;
+  x = x1*sin(x2)*cos(x3);
+  y = x1*sin(x2)*sin(x3);
+  z = x1*cos(x2);
+  xp = x*cos(beta) - z*sin(beta);
+  yp = y;
+  zp = x*sin(beta) + z*cos(beta);
+  r = sqrt(xp*xp + yp*yp + zp*zp);
+  theta = acos(zp/r);
+  EXPAND(B0[0] = Bq*pow(r,-3)*cos(theta);,
+         B0[1] = (Bq/2.)*pow(r,-3)*sin(theta);,
+         B0[2] = 0.0;)
+
+}
+#endif
+/*================================================================================*/
+
 void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {        
 /*================================================================================*/
   int i, j, k, ip, kp, jp;
 
   double Cs_p, Mratio, Lratio, T, mu, a, b, Q, a_eff, M_star, Edd;
-  double L, c, M_dot, ke, Omega2, A, Bcgs, cs, bq, dvdx1, dvdx12;
+  double L, c, M_dot, ke, Omega2, A, Bcgs, cs, eta, Bq, dvdx1, dvdx12;
   double nu2_c, B, sigma, f, gLx1, gLx2, gcx1, gcx2, gg, beta;
-  double x, y, z, xp, yp, zp, r, theta;
+  double x, y, z, xp, yp, zp, r, theta, v_inf, v_esc;
+  double vradial, vtheta, vphi;
 
   double *x1    = grid[IDIR].x;                                                  
   double  *x2    = grid[JDIR].x;                                                  
@@ -138,6 +175,8 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
   Bcgs   = g_inputParam[B_CGS];
   cs     = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu));
   Bq     = Bcgs/UNIT_B;
+  v_esc     = sqrt(2.0*UNIT_G*M_star*(1.0-Edd));                              
+  v_inf     = v_esc * sqrt((a/(1.0-a)));                                      
 #if EOS == ISOTHERMAL                                                  
   g_isoSoundSpeed = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu));
 #endif       
@@ -146,31 +185,57 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
   g_gamma = 1.05;
 #endif
 
-  if(side == X1_BEG){BOX_LOOP(box,k,j,i){                           
+  eta = pow(Bq, 2)/(M_dot*v_inf);
 
-    rho[k][j][i] = (M_dot/(4.0*CONST_PI*(cs/Cs_p)));          
-    prs[k][j][i] = ((rho[k][j][i])*T/(KELVIN*mu));          
+  if(side == X1_BEG){                          
+    if(box->vpos == CENTER){
+      BOX_LOOP(box,k,j,i){ 
+  
+        //printf("i=%i, j=%i, k=%i \n", i, j, k);
 
-    EXPAND(vx1[k][j][i] = cs/Cs_p;,
-           vx2[k][j][i] = 0.0;,
-           vx3[k][j][i] = 0.0;)
+        rho[k][j][i] = (M_dot/(4.0*CONST_PI*(cs/Cs_p)));          
 
-    //printf("rho=%e, prs=%e \n", rho[k][j][i], prs[k][j][i]);
+        //printf("i=%i, j=%i, k=%i, rho=%e, (NX1_TOT - NX1)/2=%i \n", i, j, k, rho[k][j][i]*UNIT_DENSITY, (NX1_TOT-NX1)/2);
+
+        prs[k][j][i] = ((M_dot/(4.0*CONST_PI*(cs/Cs_p)))*T/(KELVIN*mu));          
+
+        if (eta > 1.0){
+          EXPAND(vradial = vx1[k][j][(NX1_TOT - NX1)/2];,
+                 vtheta = vx2[k][j][(NX1_TOT - NX1)/2];,
+                 vphi = vx3[k][j][(NX1_TOT - NX1)/2];)
+        } else if (eta <= 1.0){
+          EXPAND(vradial = vx1[k][j][(NX1_TOT - NX1)/2];,
+                 vtheta = 0.0;,
+                 vphi = 0.0;)
+        }
+
+        EXPAND(vx1[k][j][i] = vradial;,
+               vx2[k][j][i] = vtheta;,
+               vx3[k][j][i] = vphi;)
+
+        //printf("eta=%e, vradial=%e \n", eta, vradial);
 
 #if PHYSICS == MHD   
-    x = x1[i]*sin(x2[j])*cos(x3[k]);
-    y = x1[i]*sin(x2[j])*sin(x3[k]);
-    z = x1[i]*cos(x2[j]);
-    xp = x*cos(beta) - z*sin(beta);
-    yp = y;
-    zp = x*sin(beta) + z*cos(beta);
-    r = sqrt(xp*xp + yp*yp + zp*zp);
-    theta = acos(zp/r);
-    EXPAND(bx1[k][j][i] = Bq*pow(r,-3)*cos(theta);,            
-           bx2[k][j][i] = (Bq/2.)*pow(r,-3)*sin(theta);,                 
-           bx3[k][j][i] = 0.0;)                                                   
+#if BACKGROUND_FIELD == NO
+        x = x1[i]*sin(x2[j])*cos(x3[k]);
+        y = x1[i]*sin(x2[j])*sin(x3[k]);
+        z = x1[i]*cos(x2[j]);
+        xp = x*cos(beta) - z*sin(beta);
+        yp = y;
+        zp = x*sin(beta) + z*cos(beta);
+        r = sqrt(xp*xp + yp*yp + zp*zp);
+        theta = acos(zp/r);
+        EXPAND(bx1[k][j][i] = Bq*pow(r,-3)*cos(theta);,            
+               bx2[k][j][i] = (Bq/2.)*pow(r,-3)*sin(theta);,                 
+               bx3[k][j][i] = 0.0;)                                                   
+#endif
+#if BACKGROUND_FIELD == YES
+        EXPAND(bx1[k][j][i] = 0.0;,
+               bx1[k][j][i] = 0.0;,
+               bx1[k][j][i] = 0.0;)
+#endif
 #endif                                                            
-  }}
+  }}}
                                                                    
 /*
   if(side == X2_BEG){X2_BEG_LOOP(k,j,i){                           

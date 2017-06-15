@@ -1,7 +1,7 @@
 #define  PHYSICS                 MHD
-#define  DIMENSIONS              3
-#define  COMPONENTS              3
-#define  GEOMETRY                SPHERICAL
+#define  DIMENSIONS              2
+#define  COMPONENTS              2
+#define  GEOMETRY                POLAR
 #define  BODY_FORCE              VECTOR
 #define  COOLING                 POWER_LAW
 #define  RECONSTRUCTION          PARABOLIC
@@ -14,8 +14,8 @@
 
 #define  EOS                     IDEAL
 #define  ENTROPY_SWITCH          NO
-#define  DIVB_CONTROL            DIV_CLEANING
-#define  BACKGROUND_FIELD        NO
+#define  DIVB_CONTROL            CONSTRAINED_TRANSPORT
+#define  BACKGROUND_FIELD        YES
 #define  RESISTIVITY             NO
 #define  THERMAL_CONDUCTION      NO
 #define  VISCOSITY               NO
@@ -66,5 +66,7 @@
 #define  SHOCK_FLATTENING          NO
 #define  CHAR_LIMITING             NO
 #define  LIMITER                   VANLEER_LIM
+#define  CT_EMF_AVERAGE            UCT_HLL
+#define  CT_EN_CORRECTION          NO
 #define  ASSIGN_VECTOR_POTENTIAL   NO
 #define  UPDATE_VECTOR_POTENTIAL   NO
