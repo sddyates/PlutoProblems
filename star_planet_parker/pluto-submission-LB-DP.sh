@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-#SBATCH --job-name=HUV
-#SBATCH --output=HUV.txt
+#SBATCH --job-name=LB_DP
+#SBATCH --output=LB_DP.txt
 #
 #SBATCH --get-user-env
 #SBATCH --export=NONE
@@ -10,4 +10,4 @@
 #SBATCH --mem-per-cpu=2000
 
 module load openmpi
-mpirun -np 32 ./pluto -i pluto_HUV.ini
+mpirun -np 32 ./pluto -i pluto_LB_DP.ini

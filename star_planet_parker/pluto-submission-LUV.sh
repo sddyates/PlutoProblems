@@ -1,11 +1,13 @@
 #!/bin/bash
-#MOAB -l walltime=2:00:00:00,nodes=1:ppn=16
-#MOAB -j oe
-#MOAB -N pluto
-#MOAB -q bbdefault
-#MOAB -m abe
+#
+#SBATCH --job-name=LUV
+#SBATCH --output=LUV.txt
+#
+#SBATCH --get-user-env
+#SBATCH --export=NONE
+#SBATCH --ntasks=32
+#SBATCH --time=10-00:00:00
+#SBATCH --mem-per-cpu=2000
 
-cd "$PBS_O_WORKDIR"
-module load apps/gcc/v4.8.4
-module load apps/openmpi
-mpirun -np 16 ./pluto -i pluto_LUV.ini
+module load openmpi
+mpirun -np 32 ./pluto -i pluto_LUV.ini

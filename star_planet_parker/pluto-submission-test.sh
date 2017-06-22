@@ -1,12 +1,13 @@
 #!/bin/bash
-#MOAB -l walltime=00:00:30:00,nodes=1:ppn=8
-#MOAB -j oe
-#MOAB -N pluto
-#MOAB -q bbtest
-#MOAB -m abe
+#
+#SBATCH --job-name=pluto_SPI_test
+#SBATCH --output=pluto_SPI_test.txt
+#
+#SBATCH --get-user-env
+#SBATCH --export=NONE
+#SBATCH --ntasks=8
+#SBATCH --time=00-00:30:00
+#SBATCH --mem-per-cpu=2000
 
-cd "$PBS_O_WORKDIR"
-module load apps/gcc/v4.8.4
-module load apps/openmpi
-mpirun -np 4 ./pluto -i pluto_HUV.ini &
-mpirun -np 4 ./pluto -i pluto_LUV.ini
+module load openmpi
+mpirun -np 8 ./pluto -i pluto_HUV.ini
