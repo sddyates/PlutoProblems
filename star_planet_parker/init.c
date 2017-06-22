@@ -108,8 +108,12 @@ void Init (double *v, double x1, double x2, double x3)
            v[VX3] = parker[0]*cos(thetap);)
     v[PRS] = parker[1];
     v[RHO] = parker[2];
-
   }
+
+  if (rp > Rp && rp <= 1.5*Rp){
+    v[TRC+1] = 1.0;
+  }
+
   // Set the density, pressure, velocity of the stellar wind 
   // and stellar interiar.
   if(rs <= Rs){
@@ -128,9 +132,12 @@ void Init (double *v, double x1, double x2, double x3)
            v[VX3] = parker[0]*cos(thetas);)
     v[PRS] = parker[1];
     v[RHO] = parker[2];
-
   }
   
+  if (rs > Rs && rs <= 1.5*Rs){
+    v[TRC] = 1.0;
+  }
+
   // Set magnetic fields of the star and planet as the sum of two 
   // dipole fields.
 #if PHYSICS == MHD
@@ -201,7 +208,7 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
     B0[1] = 0.0;
     B0[2] = 16.0*B0s;       
 
-  } else if (rs > 0.5*Rs && rs <= 1.0*Rs) {
+  } else if (rs > 0.5*Rs && rs <= Rs) {
 
     B0[0] = 3.0*x1*x3*B0s*pow(Rs, 3)*pow(rs, -5);
     B0[1] = 3.0*x3*x2*B0s*pow(Rs, 3)*pow(rs, -5);
@@ -213,13 +220,13 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
     B0[1] = 0.0;
     B0[2] = 16.0*B0p;       
 
-  } else if (rp > 0.5*Rp && rp <= 10.0*Rp) {
+  } else if (rp > 0.5*Rp && rp <= Rp) {
 
     B0[0] = 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);
     B0[1] = 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);
     B0[2] = (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);       
 
-  } else if (rs > 1.0*Rs && rp > 10.0*Rp) {
+  } else if (rs > Rs && rp > Rp) {
 
     B0[0] = 3.0*x1*x3*B0s*pow(Rs, 3)*pow(rs, -5) + 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);
     B0[1] = 3.0*x3*x2*B0s*pow(Rs, 3)*pow(rs, -5) + 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);
@@ -367,7 +374,10 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
         d->Vc[PRS][k][j][i] = parker[1];
         d->Vc[RHO][k][j][i] = parker[2];
         //d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
+      }
 
+      if (rp > Rp && rp <= 1.5*Rp){
+        d->Vc[TRC+1][k][j][i] = 1.0;
       }
 
       // Set the density, pressure, velocity of the stellar wind 
@@ -424,8 +434,13 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
                d->Vc[VX3][k][j][i] = parker[0]*cos(thetas);)
         d->Vc[PRS][k][j][i] = parker[1];
         d->Vc[RHO][k][j][i] = parker[2];
-        d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
+        d->Vc[TRC][k][j][i] = 1.0;
+        //d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
 
+      }
+
+      if (rs > Rs && rs <= 1.5*Rs){
+        d->Vc[TRC][k][j][i] = 1.0;
       }
 
       if (d->Vc[PRS][k][j][i] < g_smallPressure){
