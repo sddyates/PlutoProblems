@@ -139,7 +139,7 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
 
   Bcgs = sqrt(eta*M_dot_cgs*v_inf_cgs/pow(Rcgs, 2));
   Bq = Bcgs/UNIT_B;
-  printf("Bcgs=%e \n",Bcgs);
+  //printf("Bcgs=%e \n",Bcgs);
 
   beta *= 0.0174532925;
   x = x1*sin(x2)*cos(x3);
