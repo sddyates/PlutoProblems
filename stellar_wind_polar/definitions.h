@@ -1,14 +1,14 @@
 #define  PHYSICS                 MHD
-#define  DIMENSIONS              2
-#define  COMPONENTS              2
-#define  GEOMETRY                POLAR
+#define  DIMENSIONS              3
+#define  COMPONENTS              3
+#define  GEOMETRY                SPHERICAL
 #define  BODY_FORCE              VECTOR
 #define  COOLING                 POWER_LAW
 #define  RECONSTRUCTION          PARABOLIC
 #define  TIME_STEPPING           RK3
 #define  DIMENSIONAL_SPLITTING   NO
 #define  NTRACER                 0
-#define  USER_DEF_PARAMETERS     11
+#define  USER_DEF_PARAMETERS     12
 
 /* -- physics dependent declarations -- */
 
@@ -23,17 +23,18 @@
 
 /* -- user-defined parameters (labels) -- */
 
-#define  Cs_P                    0
-#define  M_RATIO                 1
-#define  L_RATIO                 2
-#define  B_CGS                   3
-#define  TT                      4
-#define  MU                      5
-#define  AA                      6
-#define  Bb                      7
-#define  QQ                      8
-#define  aa_eff                  9
-#define  BB                      10
+#define  Eta                     0
+#define  R_RATIO                 1
+#define  Cs_P                    2
+#define  M_RATIO                 3
+#define  L_RATIO                 4
+#define  TT                      5
+#define  MU                      6
+#define  AA                      7
+#define  Bb                      8
+#define  QQ                      9
+#define  aa_eff                  10
+#define  BB                      11
 
 /* [Beg] user-defined constants (do not change this line) */
 

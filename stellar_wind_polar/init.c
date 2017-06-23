@@ -20,31 +20,38 @@
 */                                                                                  
 void Init (double *v, double x1, double x2, double x3){
 /*================================================================================*/
-  double Mratio, Lratio, Bcgs, T, mu, a, b, Q, a_eff, M_star, Edd;
-  double L, c, M_dot, cs, Bq, v_esc, v_inf, vv, beta;
-  double x, y, z, xp, yp, zp, r, theta;
+  double Mratio, Lratio, Bcgs, T, mu, a, b, Q, a_eff, M_star, Edd, eta, Rratio;
+  double L, c, M_dot, cs, Bq, v_esc, v_inf, vv, beta, M_dot_cgs, v_inf_cgs;
+  double x, y, z, xp, yp, zp, r, theta, Rcgs;
 
-  Mratio    = g_inputParam[M_RATIO];
-  Lratio    = g_inputParam[L_RATIO];
-  Bcgs      = g_inputParam[B_CGS];
-  T         = g_inputParam[TT];
-  mu        = g_inputParam[MU];
-  a         = g_inputParam[AA];
-  b         = g_inputParam[Bb];
-  Q         = g_inputParam[QQ];
-  a_eff     = g_inputParam[aa_eff];
-  M_star    = (Mratio*CONST_Msun/UNIT_MASS);
-  Edd       = (2.6e-5*(Lratio)*(1.0/Mratio));
-  L         = (Lratio*L_sun/UNIT_L);
-  c         = 3.0e+5;
-  M_dot     = pow(1.0+a_eff,-(1.0/a_eff)) * a_eff * pow(1.0-a_eff,-1)*
-              (L/(c*c))*pow(((Q*Edd)*pow(1.0-Edd,-1)),pow(a_eff,-1)-1.0);
-  cs        = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu));
-  Bq        = Bcgs/UNIT_B;
-  v_esc     = sqrt(2.0*UNIT_G*M_star*(1.0-Edd));                              
-  v_inf     = v_esc * sqrt((a/(1.0-a)));                                      
-  vv        = v_inf*pow(1.0-(1.0/x1),b);                                      
-  beta      = g_inputParam[BB];
+  eta = g_inputParam[Eta];
+  Rratio = g_inputParam[R_RATIO];
+  Mratio = g_inputParam[M_RATIO];
+  Lratio = g_inputParam[L_RATIO];
+  T = g_inputParam[TT];
+  mu = g_inputParam[MU];
+  a = g_inputParam[AA];
+  b = g_inputParam[Bb];
+  Q = g_inputParam[QQ];
+  a_eff = g_inputParam[aa_eff];
+  Rcgs = Rratio*UNIT_LENGTH;
+  M_star = (Mratio*CONST_Msun/UNIT_MASS);
+  Edd = (2.6e-5*(Lratio)*(1.0/Mratio));
+  L = (Lratio*L_sun/UNIT_L);
+  c = 3.0e+5;
+  M_dot = pow(1.0+a_eff,-(1.0/a_eff)) * a_eff * pow(1.0-a_eff,-1)*
+         (L/(c*c))*pow(((Q*Edd)*pow(1.0-Edd,-1)),pow(a_eff,-1)-1.0);
+  M_dot_cgs = M_dot*UNIT_MASS/UNIT_TIME;
+  cs = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu));
+  v_esc = sqrt(2.0*UNIT_G*M_star*(1.0-Edd));                              
+  v_inf = v_esc * sqrt((a/(1.0-a)));                                      
+  v_inf_cgs = v_inf*UNIT_VELOCITY;
+  vv = v_inf*pow(1.0-(1.0/x1),b);                                      
+  beta = g_inputParam[BB];
+
+  Bcgs = sqrt(eta*M_dot_cgs*v_inf_cgs/pow(Rcgs, 2));
+  Bq = Bcgs/UNIT_B;
+  //printf("Bcgs=%e \n",Bcgs);
 
   g_smallPressure = (v[RHO])*T/(KELVIN*mu); /**< Small value for pressure fix. */
 #if EOS == IDEAL
@@ -100,15 +107,39 @@ void Analysis (const Data *d, Grid *grid)
 /*================================================================================*/
 #if BACKGROUND_FIELD == YES
 void BackgroundField (double x1, double x2, double x3, double *B0)                                                    
-{                                                                                                                     
-
-  double Bq, Bcgs, beta, r;
+{                                                                                                                    
+  double Rratio, Lratio, Mratio;
+  double M_dot, v_inf, a, Q, Edd, a_ff, L, c;
+  double eta, M_dot_cgs, v_inf_cgs, Rcgs;
+  double Bq, Bcgs, beta, r, v_esc, a_eff, M_star;
   double x, y, z;
   double xp, yp, zp;
   double theta;
-  Bcgs = g_inputParam[B_CGS];
-  Bq = Bcgs/UNIT_B;
+
   beta = g_inputParam[BB];
+  eta = g_inputParam[Eta];
+  Rratio = g_inputParam[R_RATIO];
+  Mratio = g_inputParam[M_RATIO];
+  Lratio = g_inputParam[L_RATIO];
+  a = g_inputParam[AA];
+  Q = g_inputParam[QQ];
+  a_eff = g_inputParam[aa_eff];
+  Rcgs = Rratio*UNIT_LENGTH;
+  Edd = (2.6e-5*(Lratio)*(1.0/Mratio));
+  L = (Lratio*L_sun/UNIT_L);
+  M_star = (Mratio*CONST_Msun/UNIT_MASS);
+  c = 3.0e+5;
+  v_esc = sqrt(2.0*UNIT_G*M_star*(1.0-Edd));                              
+  v_inf = v_esc * sqrt((a/(1.0-a)));                                      
+  v_inf_cgs = v_inf*UNIT_VELOCITY;
+
+  M_dot = pow(1.0+a_eff,-(1.0/a_eff)) * a_eff * pow(1.0-a_eff,-1)*
+         (L/(c*c))*pow(((Q*Edd)*pow(1.0-Edd,-1)),pow(a_eff,-1)-1.0);
+  M_dot_cgs = M_dot*UNIT_MASS/UNIT_TIME;
+
+  Bcgs = sqrt(eta*M_dot_cgs*v_inf_cgs/pow(Rcgs, 2));
+  Bq = Bcgs/UNIT_B;
+  printf("Bcgs=%e \n",Bcgs);
 
   beta *= 0.0174532925;
   x = x1*sin(x2)*cos(x3);
@@ -131,52 +162,57 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
 /*================================================================================*/
   int i, j, k, ip, kp, jp;
 
-  double Cs_p, Mratio, Lratio, T, mu, a, b, Q, a_eff, M_star, Edd;
+  double Cs_p, Mratio, Lratio, T, mu, a, b, Q, a_eff, M_star, Edd, Rratio;
   double L, c, M_dot, ke, Omega2, A, Bcgs, cs, eta, Bq, dvdx1, dvdx12;
-  double nu2_c, B, sigma, f, gLx1, gLx2, gcx1, gcx2, gg, beta;
-  double x, y, z, xp, yp, zp, r, theta, v_inf, v_esc;
+  double nu2_c, B, sigma, f, gLx1, gLx2, gcx1, gcx2, gg, beta, Rcgs;
+  double x, y, z, xp, yp, zp, r, theta, v_inf, v_esc, v_inf_cgs, M_dot_cgs;
   double vradial, vtheta, vphi;
 
-  double *x1    = grid[IDIR].x;                                                  
-  double  *x2    = grid[JDIR].x;                                                  
-  double  *x3    = grid[KDIR].x;
-  double  *dx1   = grid[IDIR].dx;
-  double  *dx2   = grid[JDIR].dx;
-  double  *dx3   = grid[KDIR].dx;
-  double  ***vx1 = d->Vc[VX1];
-  double  ***vx2 = d->Vc[VX2];                                                  
-  double  ***vx3 = d->Vc[VX3];
-  double  ***rho = d->Vc[RHO];
-  double  ***prs = d->Vc[PRS];
+  double *x1 = grid[IDIR].x;                                                  
+  double *x2 = grid[JDIR].x;                                                  
+  double *x3 = grid[KDIR].x;
+  double *dx1 = grid[IDIR].dx;
+  double *dx2 = grid[JDIR].dx;
+  double *dx3 = grid[KDIR].dx;
+  double ***vx1 = d->Vc[VX1];
+  double ***vx2 = d->Vc[VX2];                                                  
+  double ***vx3 = d->Vc[VX3];
+  double ***rho = d->Vc[RHO];
+  double ***prs = d->Vc[PRS];
 #if PHYSICS == MHD
-  double  ***bx1 = d->Vc[BX1];
-  double  ***bx2 = d->Vc[BX2];
-  double  ***bx3 = d->Vc[BX3];
+  double ***bx1 = d->Vc[BX1];
+  double ***bx2 = d->Vc[BX2];
+  double ***bx3 = d->Vc[BX3];
 #endif
 
-  Cs_p   = g_inputParam[Cs_P];
+  eta = g_inputParam[Eta];
+  Rratio = g_inputParam[R_RATIO];
+  Cs_p = g_inputParam[Cs_P];
   Mratio = g_inputParam[M_RATIO];
   Lratio = g_inputParam[L_RATIO];
-  T      = g_inputParam[TT];
-  mu     = g_inputParam[MU];
-  a      = g_inputParam[AA];
-  b      = g_inputParam[Bb];
-  Q      = g_inputParam[QQ];
-  a_eff  = g_inputParam[aa_eff];
+  T = g_inputParam[TT];
+  mu = g_inputParam[MU];
+  a = g_inputParam[AA];
+  b = g_inputParam[Bb];
+  Q = g_inputParam[QQ];
+  a_eff = g_inputParam[aa_eff];
   M_star = (Mratio*CONST_Msun/UNIT_MASS);
-  Edd    = (2.6e-5*(Lratio)*(1.0/Mratio));
-  L      = (Lratio*L_sun/UNIT_L);
-  c      = 3.0e+5;
-  M_dot  = pow(1.0+a_eff,-(1.0/a_eff)) * a_eff * pow(1.0-a_eff,-1)*
-           (L*pow(c,-2))*pow(((Q*Edd)*pow(1.0-Edd,-1)),pow(a_eff,-1)-1.0);
-  ke     = ((4.0*CONST_PI*UNIT_G*M_star*c*Edd)/L);
+  Edd = (2.6e-5*(Lratio)*(1.0/Mratio));
+  L = (Lratio*L_sun/UNIT_L);
+  c = 3.0e+5;
+  M_dot = pow(1.0+a_eff,-(1.0/a_eff)) * a_eff * pow(1.0-a_eff,-1)*
+          (L*pow(c,-2))*pow(((Q*Edd)*pow(1.0-Edd,-1)),pow(a_eff,-1)-1.0);
+  M_dot_cgs = M_dot*UNIT_MASS/UNIT_TIME;
+  Rcgs = Rratio*UNIT_LENGTH;
+
+  ke = ((4.0*CONST_PI*UNIT_G*M_star*c*Edd)/L);
   Omega2 = pow(0.5,2)*(8.0/27.0)*UNIT_G*M_star;
-  A      = ((1.0/(1.0-a))*((ke*L*Q)/(4.0*CONST_PI*c)));
-  Bcgs   = g_inputParam[B_CGS];
-  cs     = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu));
-  Bq     = Bcgs/UNIT_B;
-  v_esc     = sqrt(2.0*UNIT_G*M_star*(1.0-Edd));                              
-  v_inf     = v_esc * sqrt((a/(1.0-a)));                                      
+  A = ((1.0/(1.0-a))*((ke*L*Q)/(4.0*CONST_PI*c)));
+  cs = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu));
+  Bq = Bcgs/UNIT_B;
+  v_esc = sqrt(2.0*UNIT_G*M_star*(1.0-Edd));                              
+  v_inf = v_esc * sqrt((a/(1.0-a)));                                      
+  v_inf_cgs = v_inf*UNIT_VELOCITY;
 #if EOS == ISOTHERMAL                                                  
   g_isoSoundSpeed = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu));
 #endif       
@@ -185,7 +221,8 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
   g_gamma = 1.05;
 #endif
 
-  eta = pow(Bq, 2)/(M_dot*v_inf);
+  Bcgs = sqrt(eta*M_dot_cgs*v_inf_cgs/pow(Rcgs, 2));
+  Bq = Bcgs/UNIT_B;
 
   if(side == X1_BEG){                          
     if(box->vpos == CENTER){
