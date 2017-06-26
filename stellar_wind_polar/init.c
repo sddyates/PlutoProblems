@@ -168,7 +168,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
 
   double Cs_p, Mratio, Lratio, T, mu, a, b, Q, a_eff, M_star, Edd, Rratio;
   double L, c, M_dot, ke, Omega2, A, Bcgs, cs, eta, Bq;
-  double nu2_c, B, sigma, f, gLx1, gLx2, gcx1, gcx2, gg, beta, Rcgs;
+  double nu2_c, B, sigma, f, gLx1, gLx2, gcx1, gcx2, gg, beta, Rcgs, vv;
   double x, y, z, xp, yp, zp, r, theta, v_inf, v_esc, v_inf_cgs, M_dot_cgs;
   double vradial, vtheta, vphi;
   double dvdx1, dvdx2, dvdx3;
@@ -237,6 +237,8 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
   
         //printf("i=%i, j=%i, k=%i \n", i, j, k);
 
+        //vv = v_inf*pow(1.0-(1.0/x1[ghost]),b);                                      
+        //rho[k][j][i] = (M_dot/(4.0*CONST_PI*vv*x1[ghost]*x1[ghost]));          
         rho[k][j][i] = (M_dot/(4.0*CONST_PI*(cs/Cs_p)));          
 
         //printf("i=%i, j=%i, k=%i, rho=%e, (NX1_TOT - NX1)/2=%i \n", 
@@ -372,6 +374,10 @@ void BodyForceVector(double v1, double *v, double v3, double *g,
 
   h = r3 - x1;
   dvdx1 = fabs((v3-v[VX1])/h);
+
+  //h = ((x1-r1)+(r3-x1))/2.0;
+  //dvdx1 = (-0.5*v1 + 0.5*v3)/h;
+
   nu2_c = (1.0-(1.0/(x1*x1)));
   ke     = ((4.0*CONST_PI*UNIT_G*M_star*c*Edd)/L);
   B     = ((v[RHO])*Q*c*ke);
