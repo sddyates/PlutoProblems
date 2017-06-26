@@ -22,12 +22,13 @@ void Init (double *v, double x1, double x2, double x3){
 /*================================================================================*/
   double Mratio, Lratio, Bcgs, T, mu, a, b, Q, a_eff, M_star, Edd, eta, Rratio;
   double L, c, M_dot, cs, Bq, v_esc, v_inf, vv, beta, M_dot_cgs, v_inf_cgs;
-  double x, y, z, xp, yp, zp, r, theta, Rcgs;
+  double x, y, z, xp, yp, zp, r, theta, Rcgs, omega;
 
   eta = g_inputParam[Eta];
   Rratio = g_inputParam[R_RATIO];
   Mratio = g_inputParam[M_RATIO];
   Lratio = g_inputParam[L_RATIO];
+  omega = g_inputParam[OMEGA];
   T = g_inputParam[TT];
   mu = g_inputParam[MU];
   a = g_inputParam[AA];
@@ -62,7 +63,7 @@ void Init (double *v, double x1, double x2, double x3){
 #endif
   if(isnan(-vv) || isnan(vv)){vv = 0.00518*v_inf;}                                   
 #if ROTATING_FRAME == YES                                                          
-  g_OmegaZ = (0.5*sqrt((8.0*UNIT_G*M_star)/27.0));                                  
+  g_OmegaZ = (omega*sqrt((8.0*UNIT_G*M_star)/27.0));                                  
 #endif                                                                             
 #if EOS == ISOTHERMAL                                                              
   v[RHO] = (M_dot/(4.0*CONST_PI*vv*x1*x1));                                         
@@ -139,7 +140,7 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
 
   Bcgs = sqrt(eta*M_dot_cgs*v_inf_cgs/pow(Rcgs, 2));
   Bq = Bcgs/UNIT_B;
-  //printf("Bcgs=%e \n",Bcgs);
+  //printf("Bcgs=%e, Bq=%e \n",Bcgs, Bq);
 
   beta *= 0.0174532925;
   x = x1*sin(x2)*cos(x3);
@@ -154,19 +155,23 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
          B0[1] = (Bq/2.)*pow(r,-3)*sin(theta);,
          B0[2] = 0.0;)
 
+  //printf("B0=%e, B1=%e, B2=%e \n",B0[0],B0[1],B0[2]);
+
 }
 #endif
 /*================================================================================*/
 
 void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {        
 /*================================================================================*/
-  int i, j, k, ip, kp, jp;
+
+  int i, j, k, ip, kp, jp, ghost;
 
   double Cs_p, Mratio, Lratio, T, mu, a, b, Q, a_eff, M_star, Edd, Rratio;
-  double L, c, M_dot, ke, Omega2, A, Bcgs, cs, eta, Bq, dvdx1, dvdx12;
+  double L, c, M_dot, ke, Omega2, A, Bcgs, cs, eta, Bq;
   double nu2_c, B, sigma, f, gLx1, gLx2, gcx1, gcx2, gg, beta, Rcgs;
   double x, y, z, xp, yp, zp, r, theta, v_inf, v_esc, v_inf_cgs, M_dot_cgs;
   double vradial, vtheta, vphi;
+  double dvdx1, dvdx2, dvdx3;
 
   double *x1 = grid[IDIR].x;                                                  
   double *x2 = grid[JDIR].x;                                                  
@@ -224,6 +229,8 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
   Bcgs = sqrt(eta*M_dot_cgs*v_inf_cgs/pow(Rcgs, 2));
   Bq = Bcgs/UNIT_B;
 
+  ghost = (NX1_TOT - NX1)/2;
+
   if(side == X1_BEG){                          
     if(box->vpos == CENTER){
       BOX_LOOP(box,k,j,i){ 
@@ -232,16 +239,17 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
 
         rho[k][j][i] = (M_dot/(4.0*CONST_PI*(cs/Cs_p)));          
 
-        //printf("i=%i, j=%i, k=%i, rho=%e, (NX1_TOT - NX1)/2=%i \n", i, j, k, rho[k][j][i]*UNIT_DENSITY, (NX1_TOT-NX1)/2);
+        //printf("i=%i, j=%i, k=%i, rho=%e, (NX1_TOT - NX1)/2=%i \n", 
+        //        i, j, k, rho[k][j][i]*UNIT_DENSITY, (NX1_TOT-NX1)/2);
 
         prs[k][j][i] = ((M_dot/(4.0*CONST_PI*(cs/Cs_p)))*T/(KELVIN*mu));          
 
         if (eta > 1.0){
-          EXPAND(vradial = vx1[k][j][(NX1_TOT - NX1)/2];,
-                 vtheta = vx2[k][j][(NX1_TOT - NX1)/2];,
-                 vphi = vx3[k][j][(NX1_TOT - NX1)/2];)
+          EXPAND(vradial = vx1[k][j][ghost];,
+                 vtheta = vx2[k][j][ghost];,
+                 vphi = vx3[k][j][ghost];)
         } else if (eta <= 1.0){
-          EXPAND(vradial = vx1[k][j][(NX1_TOT - NX1)/2];,
+          EXPAND(vradial = vx1[k][j][ghost];,
                  vtheta = 0.0;,
                  vphi = 0.0;)
         }

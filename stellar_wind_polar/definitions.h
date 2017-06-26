@@ -1,22 +1,19 @@
-#define  PHYSICS                 MHD
-#define  DIMENSIONS              3
-#define  COMPONENTS              3
-#define  GEOMETRY                SPHERICAL
+#define  PHYSICS                 HD
+#define  DIMENSIONS              2
+#define  COMPONENTS              2
+#define  GEOMETRY                POLAR
 #define  BODY_FORCE              VECTOR
-#define  COOLING                 POWER_LAW
+#define  COOLING                 NO
 #define  RECONSTRUCTION          PARABOLIC
 #define  TIME_STEPPING           RK3
 #define  DIMENSIONAL_SPLITTING   NO
 #define  NTRACER                 0
-#define  USER_DEF_PARAMETERS     12
+#define  USER_DEF_PARAMETERS     13
 
 /* -- physics dependent declarations -- */
 
 #define  EOS                     IDEAL
 #define  ENTROPY_SWITCH          NO
-#define  DIVB_CONTROL            CONSTRAINED_TRANSPORT
-#define  BACKGROUND_FIELD        YES
-#define  RESISTIVITY             NO
 #define  THERMAL_CONDUCTION      NO
 #define  VISCOSITY               NO
 #define  ROTATING_FRAME          NO
@@ -35,6 +32,7 @@
 #define  QQ                      9
 #define  aa_eff                  10
 #define  BB                      11
+#define  OMEGA                   12
 
 /* [Beg] user-defined constants (do not change this line) */
 
@@ -50,7 +48,7 @@
 #define  tyear                   3.15569e+7
 #define  tday                    8.64e+4
 #define  L_sun                   3.846e+33
-#define  VTK_VECTOR_DUMP         YES
+#define  VTK_VECTOR_DUMP         NO
 #define  GLM_EXTENDED            YES
 #define  CAK                     YES
 #define  CHOMBO_LOGR             YES
@@ -60,14 +58,10 @@
 
 /* -- supplementary constants (user editable) -- */ 
 
-#define  INITIAL_SMOOTHING         NO
-#define  WARNING_MESSAGES          NO
-#define  PRINT_TO_FILE             YES
-#define  INTERNAL_BOUNDARY         YES
-#define  SHOCK_FLATTENING          NO
-#define  CHAR_LIMITING             NO
-#define  LIMITER                   VANLEER_LIM
-#define  CT_EMF_AVERAGE            UCT_HLL
-#define  CT_EN_CORRECTION          NO
-#define  ASSIGN_VECTOR_POTENTIAL   NO
-#define  UPDATE_VECTOR_POTENTIAL   NO
+#define  INITIAL_SMOOTHING   NO
+#define  WARNING_MESSAGES    NO
+#define  PRINT_TO_FILE       YES
+#define  INTERNAL_BOUNDARY   YES
+#define  SHOCK_FLATTENING    NO
+#define  CHAR_LIMITING       NO
+#define  LIMITER             VANLEER_LIM
