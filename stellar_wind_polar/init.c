@@ -268,7 +268,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
 #if EOS == IDEAL
         prs[k][j][i] = ((rho[k][j][i])*T/(KELVIN*mu));          
 #endif
-        EXPAND(vx1[k][j][i] = cs;,
+        EXPAND(vx1[k][j][i] = cs/Cs_p;,
                vx2[k][j][i] = 0.0;,
                vx3[k][j][i] = 0.0;)
 
