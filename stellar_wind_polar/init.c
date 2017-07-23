@@ -254,9 +254,9 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
                  vtheta = 0.0;,
                  vphi = 0.0;)
         } else if (vx1[k][j][ghost] < fabs(cs)) {
-          vradial = 2.0*vx1[k][j][ghost] - vx1[k][j][ghost+1];
-          vtheta = 2.0*vx2[k][j][ghost] - vx2[k][j][ghost+1];
-          vphi = 2.0*vx3[k][j][ghost] - vx3[k][j][ghost+1];
+          EXPAND(vradial = 2.0*vx1[k][j][ghost] - vx1[k][j][ghost+1];,
+                 vtheta = 2.0*vx2[k][j][ghost] - vx2[k][j][ghost+1];,
+                 vphi = 2.0*vx3[k][j][ghost] - vx3[k][j][ghost+1];)
         }
 
         EXPAND(vx1[k][j][i] = vradial;,
