@@ -15,7 +15,7 @@
 #define  EOS                     IDEAL
 #define  ENTROPY_SWITCH          NO
 #define  DIVB_CONTROL            DIV_CLEANING
-#define  BACKGROUND_FIELD        NO
+#define  BACKGROUND_FIELD        YES
 #define  RESISTIVITY             NO
 #define  THERMAL_CONDUCTION      NO
 #define  VISCOSITY               NO
@@ -61,4 +61,3 @@
 #define  CHAR_LIMITING             NO
 #define  LIMITER                   VANLEER_LIM
 #define  ASSIGN_VECTOR_POTENTIAL   NO
-#define  UPDATE_VECTOR_POTENTIAL   NO

@@ -20,6 +20,7 @@ void ParkerVelocity(double *parker, double cs, double v_esc, double r,
 void Init (double *v, double x1, double x2, double x3)
 {
 
+  int nv;
   int i;
   double cs, rho, pre, omega, omega_fr;
   double Rs, v_esc, ga;
@@ -119,6 +120,13 @@ void Init (double *v, double x1, double x2, double x3)
 #endif
 #endif
 
+    //for (nv = 0; nv < NVAR; nv++) {
+      //if (v[RHO] < 0.0) {
+        //printf("v[nv]=%e \n", v[nv]);
+      //}
+    //}
+
+
   } else if(r <= Rs && r > 0.5*Rs){
 
     EXPAND(v[VX1] = 0.0;,
@@ -151,15 +159,23 @@ void Init (double *v, double x1, double x2, double x3)
 #endif
 #endif
 #endif
+    //for (nv = 0; nv < NVAR; nv++) {
+      //if (v[RHO] < 0.0) {
+        //printf("v[nv]=%e \n", v[nv]);
+      //}
+    //}
 
   } else if (r > Rs){
 
     ParkerVelocity(parker, cs, v_esc, r, rc, Rs, RH, P);
+    //printf("parker[0] = %e, parker[1] = %e, parker[2] = %e, cs=%e, v_esc=%e, r=%e, rc=%e, Rs=%e, RH=%e, P=%e \n", parker[0], parker[1], parker[2], cs, v_esc, r, rc, Rs, RH, P);
     EXPAND(v[VX1] = sin(theta)*(parker[0]*cos(phi)+sin(phi)*r*(omega+omega));,
            v[VX2] = sin(theta)*(parker[0]*sin(phi)-cos(phi)*r*(omega+omega));,
            v[VX3] = parker[0]*cos(theta);)
     v[PRS] = parker[1];
     v[RHO] = parker[2];
+
+    //printf("vx1=%e, vx2=%e, vx3=%e \n", v[VX1], v[VX2], v[VX3]);
 
 #if PHYSICS == MHD
 #if BACKGROUND_FIELD == NO
@@ -185,23 +201,31 @@ void Init (double *v, double x1, double x2, double x3)
 #endif
 #endif
 #endif
+    //for (nv = 0; nv < NVAR; nv++) {
+      //if (v[RHO] < 0.0) {
+        //printf("v[nv]=%e \n", v[nv]);
+      //}
+    //}
 
   }
 
-  int nv;
+
+  /* 
   for (nv = 0; nv < NVAR; nv++) {
-    if (isnan(v[nv])) {
+    if (isnan(v[nv]) || v[RHO] < 0.0) {
+      printf("parker[0] = %e, parker[1] = %e, parker[2] = %e, cs=%e, v_esc=%e, r=%e, rc=%e, Rs=%e, RH=%e, P=%e \n", parker[0], parker[1], parker[2], cs, v_esc, r, rc, Rs, RH, P);
       printf("x1=%e, x2=%e, x3=%e \n", x1, x2, x3);
       printf("v[RHO]=%e \n", v[RHO]);
       printf("v[PRS]=%e \n", v[PRS]);
       printf("v[VX1]=%e \n", v[VX1]);
       printf("v[VX2]=%e \n", v[VX2]);
-      printf("v[VX3]=%e \n", v[VX3]);
+      //printf("v[VX3]=%e \n", v[VX3]);
       printf("v[BX1]=%e \n", v[BX1]);
       printf("v[BX2]=%e \n", v[BX2]);
-      printf("v[BX3]=%e \n", v[BX3]);
+      //printf("v[BX3]=%e \n", v[BX3]);
     }
   }
+  */
 
 }  
 
@@ -249,7 +273,7 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
   if (r <= 0.5*R){
 #if DIMENSIONS == 2
     bx = 0.0;
-    by = B0*16.0;
+    by = Bs*16.0;
     bxp = bx*cos(beta) + by*sin(beta);;
     byp = -bx*sin(beta) + by*cos(beta);
     bzp = 0.0;
@@ -257,23 +281,23 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
 #if DIMENSIONS == 3
     bx = 0.0;
     by = 0.0;
-    bz = 16.0*B0;
+    bz = 16.0*Bs;
     bxp = bx*cos(beta) + bz*sin(beta);
     byp = by;
     bzp = -bx*sin(beta) + bz*cos(beta);
 #endif 
   } else if (r > 0.5*R) {
 #if DIMENSIONS == 2
-    bx = 3.0*xp*yp*B0*pow(rp,-5);
-    by = (3.0*pow(yp,2)-pow(rp,2))*B0*pow(rp,-5);
+    bx = 3.0*xp*yp*Bs*pow(rp,-5);
+    by = (3.0*pow(yp,2)-pow(rp,2))*Bs*pow(rp,-5);
     bxp = bx*cos(beta) + by*sin(beta);;
     byp = -bx*sin(beta) + by*cos(beta);
-    bzp
+    bzp = 0.0;
 #endif
 #if DIMENSIONS == 3
-    bx = 3.0*xp*zp*B0*pow(rp,-5);
-    by = 3.0*yp*zp*B0*pow(rp,-5);
-    bz = (3.0*pow(zp,2)-pow(rp,2))*B0*pow(rp,-5);
+    bx = 3.0*xp*zp*Bs*pow(rp,-5);
+    by = 3.0*yp*zp*Bs*pow(rp,-5);
+    bz = (3.0*pow(zp,2)-pow(rp,2))*Bs*pow(rp,-5);
     bxp = bx*cos(beta) + bz*sin(beta);
     byp = by;
     bzp = -bx*sin(beta) + bz*cos(beta);
@@ -452,9 +476,11 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
         d->Vc[PRS][k][j][i] = g_smallPressure;
       }
 
+      /*     
       int nv;
       for (nv = 0; nv < NVAR; nv++) {
-        if (isnan(d->Vc[nv][k][j][i])) {
+        if (isnan(d->Vc[nv][k][j][i]) || d->Vc[RHO][k][j][i] < 0.0) {
+          printf("parker[0] = %e, parker[1] = %e, parker[2] = %e, cs=%e, v_esc=%e, r=%e, rc=%e, Rs=%e, RH=%e, P=%e \n", parker[0], parker[1], parker[2], cs, v_esc, r, rc, R, RH, P);
           printf("x1=%e, x2=%e, x3=%e \n", x1[i], x2[j], x3[k]);
           printf("xp=%e, yp=%e, zp=%e \n", xp, yp, zp);
           printf("bx=%e, by=%e, bz=%e \n", bx, by, bz);
@@ -464,12 +490,13 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
           printf("d->Vc[PRS][k][j][i]=%e \n", d->Vc[PRS][k][j][i]);
           printf("d->Vc[VX1][k][j][i]=%e \n", d->Vc[VX1][k][j][i]);
           printf("d->Vc[VX2][k][j][i]=%e \n", d->Vc[VX2][k][j][i]);
-          printf("d->Vc[VX3][k][j][i]=%e \n", d->Vc[VX3][k][j][i]);
+          //printf("d->Vc[VX3][k][j][i]=%e \n", d->Vc[VX3][k][j][i]);
           printf("d->Vc[BX1][k][j][i]=%e \n", d->Vc[BX1][k][j][i]);
           printf("d->Vc[BX2][k][j][i]=%e \n", d->Vc[BX2][k][j][i]);
-          printf("d->Vc[BX3][k][j][i]=%e \n", d->Vc[BX3][k][j][i]);
+          //printf("d->Vc[BX3][k][j][i]=%e \n", d->Vc[BX3][k][j][i]);
         }
       }
+      */
 
     }
   }
@@ -568,6 +595,7 @@ void ParkerVelocity(double *parker, double cs, double v_esc, double r,
   parker[0] = cs*sqrt(psi);
   parker[1] = P*exp(lambda*(R/r-1.0)-0.5*pow(parker[0]/cs,2));
   parker[2] = (RH/P)*parker[1];
+
 }
 
 /*================================================================================*/
