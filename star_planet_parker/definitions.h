@@ -15,7 +15,7 @@
 #define  EOS                     IDEAL
 #define  ENTROPY_SWITCH          NO
 #define  DIVB_CONTROL            DIV_CLEANING
-#define  BACKGROUND_FIELD        YES
+#define  BACKGROUND_FIELD        NO
 #define  RESISTIVITY             NO
 #define  THERMAL_CONDUCTION      NO
 #define  VISCOSITY               NO
