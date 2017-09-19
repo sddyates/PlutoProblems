@@ -3,18 +3,18 @@
 #define  COMPONENTS              2
 #define  GEOMETRY                POLAR
 #define  BODY_FORCE              VECTOR
-#define  COOLING                 POWER_LAW
+#define  COOLING                 NO
 #define  RECONSTRUCTION          PARABOLIC
 #define  TIME_STEPPING           RK3
 #define  DIMENSIONAL_SPLITTING   NO
 #define  NTRACER                 0
-#define  USER_DEF_PARAMETERS     11
+#define  USER_DEF_PARAMETERS     13
 
 /* -- physics dependent declarations -- */
 
 #define  EOS                     IDEAL
 #define  ENTROPY_SWITCH          NO
-#define  DIVB_CONTROL            CONSTRAINED_TRANSPORT
+#define  DIVB_CONTROL            DIV_CLEANING
 #define  BACKGROUND_FIELD        YES
 #define  RESISTIVITY             NO
 #define  THERMAL_CONDUCTION      NO
@@ -23,17 +23,19 @@
 
 /* -- user-defined parameters (labels) -- */
 
-#define  Cs_P                    0
-#define  M_RATIO                 1
-#define  L_RATIO                 2
-#define  B_CGS                   3
-#define  TT                      4
-#define  MU                      5
-#define  AA                      6
-#define  Bb                      7
-#define  QQ                      8
-#define  aa_eff                  9
-#define  BB                      10
+#define  Eta                     0
+#define  R_RATIO                 1
+#define  Cs_P                    2
+#define  M_RATIO                 3
+#define  L_RATIO                 4
+#define  TT                      5
+#define  MU                      6
+#define  AA                      7
+#define  Bb                      8
+#define  QQ                      9
+#define  aa_eff                  10
+#define  BB                      11
+#define  OMEGA                   12
 
 /* [Beg] user-defined constants (do not change this line) */
 
@@ -50,7 +52,7 @@
 #define  tday                    8.64e+4
 #define  L_sun                   3.846e+33
 #define  VTK_VECTOR_DUMP         YES
-#define  GLM_EXTENDED            YES
+#define  GLM_EXTENDED            NO
 #define  CAK                     YES
 #define  CHOMBO_LOGR             YES
 #define  CHOMBO_CONS_AM          NO
@@ -66,7 +68,5 @@
 #define  SHOCK_FLATTENING          NO
 #define  CHAR_LIMITING             NO
 #define  LIMITER                   VANLEER_LIM
-#define  CT_EMF_AVERAGE            UCT_HLL
-#define  CT_EN_CORRECTION          NO
 #define  ASSIGN_VECTOR_POTENTIAL   NO
 #define  UPDATE_VECTOR_POTENTIAL   NO

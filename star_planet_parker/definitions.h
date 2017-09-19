@@ -4,10 +4,10 @@
 #define  GEOMETRY                CARTESIAN
 #define  BODY_FORCE              VECTOR
 #define  COOLING                 NO
-#define  RECONSTRUCTION          PARABOLIC
+#define  RECONSTRUCTION          LINEAR
 #define  TIME_STEPPING           RK2
 #define  DIMENSIONAL_SPLITTING   NO
-#define  NTRACER                 0
+#define  NTRACER                 2
 #define  USER_DEF_PARAMETERS     11
 
 /* -- physics dependent declarations -- */
