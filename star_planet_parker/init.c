@@ -31,6 +31,10 @@ void Init (double *v, double x1, double x2, double x3)
   double br, btheta, bphi, r, theta, phi;
   int n_pole = 4, bx1, bx2, bx3, bp0, bp1, bp2;
 
+  double a11, a12, a13;
+  double a21, a22, a23;
+  double a31, a32, a33;
+
   // quantity | value | units
 
   // adiabatic index
@@ -145,13 +149,14 @@ void Init (double *v, double x1, double x2, double x3)
 #if PHYSICS == MHD
 #if BACKGROUND_FIELD == NO
   if (n_pole == 2){
+
     if (rs <= 0.5*Rs){
 
       EXPAND(v[BX1] = 0.0;,
              v[BX2] = 0.0;,
              v[BX3] = 16.0*B0s;)
 
-    } else if (rs > 0.5*Rs && rs <= 1.0*Rs) {
+    } else if (rs > 0.5*Rs && rs <= Rs) {
 
       EXPAND(v[BX1] = 3.0*x1*x3*B0s*pow(Rs, 3)*pow(rs, -5);,
              v[BX2] = 3.0*x3*x2*B0s*pow(Rs, 3)*pow(rs, -5);,
@@ -169,43 +174,47 @@ void Init (double *v, double x1, double x2, double x3)
              v[BX2] = 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);,
              v[BX3] = (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);)
 
-    } else if (rs > 1.0*Rs && rp > sphere*Rp) {
+    } else if (rs > Rs && rp > sphere*Rp) {
 
-      EXPAND(v[BX1] = 3.0*x1*x3*B0s*pow(Rs, 3)*pow(rs, -5) + 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);,
-             v[BX2] = 3.0*x3*x2*B0s*pow(Rs, 3)*pow(rs, -5) + 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);,
-             v[BX3] = (3.0*x3*x3 - rs*rs)*B0s*pow(Rs, 3)*pow(rs, -5) + (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);)
+      EXPAND(v[BX1] = 3.0*x1*x3*B0s*pow(Rs, 3)*pow(rs, -5) + 
+               3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);,
+             v[BX2] = 3.0*x3*x2*B0s*pow(Rs, 3)*pow(rs, -5) + 
+               3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);,
+             v[BX3] = (3.0*x3*x3 - rs*rs)*B0s*pow(Rs, 3)*pow(rs, -5) + 
+               (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);)
   
     }
   }
 
   if(n_pole == 4){
+
     if (rs <= 0.5*Rs){
 
       EXPAND(v[BX1] = 0.0;,  
              v[BX2] = 0.0;,
              v[BX3] = 16.0*B0s;)
 
-    } else if (rs > 0.5*Rs && rs <= 1.0*Rs) {
+    } else if (rs > 0.5*Rs && rs <= Rs) {
 
       r = sqrt(x1*x1 + x2*x2 + x3*x3);
       theta = acos(x3/r);
       phi = atan2(x2, x1);
 
-      br = 0.25*B0s*pow(Rs/r, 4)*(3.0*pow(cos(theta), 2) - 1.0);
-      btheta = 0.5*B0s*pow(Rs/r, 4)*cos(theta)*sin(theta);
+      a11 = sin(theta)*cos(phi); a12 = cos(theta)*cos(phi); a13 = -sin(phi);
+      a21 = sin(theta)*sin(phi); a22 = cos(theta)*sin(phi); a23 = cos(phi);
+      a31 = cos(theta);          a32 = -sin(theta);         a33 = 0.0;
+
+      br = B0s*pow(Rs/r, 4)*(3.0*pow(cos(theta), 2) - 1.0);
+      btheta = 2.0*B0s*pow(Rs/r, 4)*cos(theta)*sin(theta);
       bphi = 0.0;
 
-      bx1 = br*sin(btheta)*cos(bphi);
-      bx2 = br*sin(btheta)*sin(bphi);
-      bx3 = br*cos(bphi);
+      bx1 = br*a11 + btheta*a12;
+      bx2 = br*a21 + btheta*a22;
+      bx3 = br*a31 + btheta*a32;
 
-      bp0 = br*sin(theta)*cos(phi) + btheta*cos(theta)*cos(phi) + bphi*sin(phi);
-      bp1 = br*sin(theta)*sin(phi) + btheta*cos(theta)*sin(phi) + bphi*cos(phi);
-      bp2 = br*cos(theta) - theta*sin(theta);
-
-      EXPAND(v[BX1] = bx1*bp0;,
-             v[BX2] = bx2*bp1;,
-             v[BX3] = bx3*bp2;)
+      EXPAND(v[BX1] = bx1;,
+             v[BX2] = bx2;,
+             v[BX3] = bx3;)
 
     } else if (rp <= 0.5*Rp){
 
@@ -213,33 +222,33 @@ void Init (double *v, double x1, double x2, double x3)
              v[BX2] = 0.0;,
              v[BX3] = 16.0*B0p;)       
 
-    } else if (rp > 0.5*Rp && rp <= 10.0*Rp) {
+    } else if (rp > 0.5*Rp && rp <= Rp) {
 
       EXPAND(v[BX1] = 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);,
              v[BX2] = 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);,
              v[BX3] = (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);)
 
-    } else if (rs > 1.0*Rs && rp > 10.0*Rp) {
+    } else if (rs > Rs && rp > Rp) {
 
       r = sqrt(x1*x1 + x2*x2 + x3*x3);
       theta = acos(x3/r);
       phi = atan2(x2, x1);
 
-      br = 0.25*B0s*pow(Rs/r, 4)*(3.0*pow(cos(theta), 2) - 1.0);
-      btheta = 0.5*B0s*pow(Rs/r, 4)*cos(theta)*sin(theta);
+      a11 = sin(theta)*cos(phi); a12 = cos(theta)*cos(phi); a13 = -sin(phi);
+      a21 = sin(theta)*sin(phi); a22 = cos(theta)*sin(phi); a23 = cos(phi);
+      a31 = cos(theta);          a32 = -sin(theta);         a33 = 0.0;
+
+      br = B0s*pow(Rs/r, 4)*(3.0*pow(cos(theta), 2) - 1.0);
+      btheta = 2.0*B0s*pow(Rs/r, 4)*cos(theta)*sin(theta);
       bphi = 0.0;
 
-      bx1 = br*sin(btheta)*cos(bphi);
-      bx2 = br*sin(btheta)*sin(bphi);
-      bx3 = br*cos(bphi);
+      bx1 = br*a11 + btheta*a12;
+      bx2 = br*a21 + btheta*a22;
+      bx3 = br*a31 + btheta*a32;
 
-      bp0 = br*sin(theta)*cos(phi) + btheta*cos(theta)*cos(phi) + bphi*sin(phi);
-      bp1 = br*sin(theta)*sin(phi) + btheta*cos(theta)*sin(phi) + bphi*cos(phi);
-      bp2 = br*cos(theta) - theta*sin(theta);
-
-      EXPAND(v[BX1] = bx1*bp0;,
-             v[BX2] = bx2*bp1;,
-             v[BX3] = bx3*bp2;)
+      EXPAND(v[BX1] = bx1;,// + 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);,
+             v[BX2] = bx2;,// + 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);,
+             v[BX3] = bx3;)// + (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);)
     }
       
   }
@@ -258,12 +267,17 @@ void Analysis (const Data *d, Grid *grid)
 
 /*================================================================================*/
 #if BACKGROUND_FIELD == YES
-void BackgroundField (double x1, double x2, double x3, double *B0)                                                    
-{                                                                                                                     
+void BackgroundField (double x1, double x2, double x3, double *B0)
+{ 
 
   double B0p, B0s, rs2, rs, rp2, rp, a, Rs, Rp;
   double br, btheta, bphi, r, theta, phi;
+  double bx1, bx2, bx3;
   int n_pole = 4;
+
+  double a11, a12, a13;
+  double a21, a22, a23;
+  double a31, a32, a33;
 
   Rp  = g_inputParam[planet_radius]*0.10045*CONST_Rsun/UNIT_LENGTH;
   Rs  = g_inputParam[star_radius]*CONST_Rsun/UNIT_LENGTH;
@@ -284,7 +298,7 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
       B0[1] = 0.0;
       B0[2] = 16.0*B0s;       
 
-    } else if (rs > 0.5*Rs && rs <= 1.0*Rs) {
+    } else if (rs > 0.5*Rs && rs <= Rs) {
 
       B0[0] = 3.0*x1*x3*B0s*pow(Rs, 3)*pow(rs, -5);
       B0[1] = 3.0*x3*x2*B0s*pow(Rs, 3)*pow(rs, -5);
@@ -292,25 +306,24 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
 
     } else if (rp <= 0.5*Rp){
 
-<<<<<<< HEAD
       B0[0] = 0.0;
       B0[1] = 0.0;
       B0[2] = 16.0*B0p;       
-=======
-  } else if (rs > 0.5*Rs && rs <= Rs) {
->>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
 
-    } else if (rp > 0.5*Rp && rp <= 10.0*Rp) {
+    } else if (rp > 0.5*Rp && rp <= Rp) {
 
       B0[0] = 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);
       B0[1] = 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);
       B0[2] = (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);       
 
-    } else if (rs > 1.0*Rs && rp > 10.0*Rp) {
+    } else if (rs > Rs && rp > Rp) {
 
-      B0[0] = 3.0*x1*x3*B0s*pow(Rs, 3)*pow(rs, -5) + 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);
-      B0[1] = 3.0*x3*x2*B0s*pow(Rs, 3)*pow(rs, -5) + 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);
-      B0[2] = (3.0*x3*x3 - rs*rs)*B0s*pow(Rs, 3)*pow(rs, -5) + (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);
+      B0[0] = 3.0*x1*x3*B0s*pow(Rs, 3)*pow(rs, -5) + 
+          3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);
+      B0[1] = 3.0*x3*x2*B0s*pow(Rs, 3)*pow(rs, -5) + 
+          3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);
+      B0[2] = (3.0*x3*x3 - rs*rs)*B0s*pow(Rs, 3)*pow(rs, -5) + 
+          (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);
 
     }
   }
@@ -318,30 +331,31 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
   if(n_pole == 4){
     if (rs <= 0.5*Rs){
 
-<<<<<<< HEAD
       B0[0] = 0.0;  
       B0[1] = 0.0;
       B0[2] = 16.0*B0s;       
-=======
-  } else if (rp > 0.5*Rp && rp <= Rp) {
->>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
 
-    } else if (rs > 0.5*Rs && rs <= 1.0*Rs) {
+    } else if (rs > 0.5*Rs && rs <= Rs) {
 
-<<<<<<< HEAD
       r = sqrt(x1*x1 + x2*x2 + x3*x3);
-      theta = acos(x2/r);
-=======
-  } else if (rs > Rs && rp > Rp) {
->>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
+      theta = acos(x3/r);
+      phi = atan2(x2, x1);
 
-      br = 0.5*pow(B0s, 2)*pow(Rs/r, 4)*(3.0*pow(cos(theta), 2) - 1.0);
-      btheta = pow(B0s, 2)*pow(Rs/r, 4)*cos(theta)*sin(theta);
+      a11 = sin(theta)*cos(phi); a12 = cos(theta)*cos(phi); a13 = -sin(phi);
+      a21 = sin(theta)*sin(phi); a22 = cos(theta)*sin(phi); a23 = cos(phi);
+      a31 = cos(theta);          a32 = -sin(theta);         a33 = 0.0;
+
+      br = B0s*pow(Rs/r, 4)*(3.0*pow(cos(theta), 2) - 1.0);
+      btheta = 2.0*B0s*pow(Rs/r, 4)*cos(theta)*sin(theta);
       bphi = 0.0;
 
-      B0[0] = br*sin(btheta)*cos(bphi);
-      B0[1] = br*sin(btheta)*sin(bphi);
-      B0[2] = br*cos(bphi);
+      bx1 = br*a11 + btheta*a12;
+      bx2 = br*a21 + btheta*a22;
+      bx3 = br*a31 + btheta*a32;
+
+      B0[0] = bx1;
+      B0[1] = bx2;
+      B0[2] = bx3;
 
     } else if (rp <= 0.5*Rp){
 
@@ -349,24 +363,33 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
       B0[1] = 0.0;
       B0[2] = 16.0*B0p;       
 
-    } else if (rp > 0.5*Rp && rp <= 10.0*Rp) {
+    } else if (rp > 0.5*Rp && rp <= Rp) {
 
       B0[0] = 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);
       B0[1] = 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);
       B0[2] = (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);       
 
-    } else if (rs > 1.0*Rs && rp > 10.0*Rp) {
+    } else if (rs > Rs && rp > Rp) {
 
       r = sqrt(x1*x1 + x2*x2 + x3*x3);
-      theta = acos(x2/r);
+      theta = acos(x3/r);
+      phi = atan2(x2, x1);
 
-      br = 0.5*pow(B0s, 2)*pow(Rs/r, 4)*(3.0*pow(cos(theta), 2) - 1.0);
-      btheta = pow(B0s, 2)*pow(Rs/r, 4)*cos(theta)*sin(theta);
+      a11 = sin(theta)*cos(phi); a12 = cos(theta)*cos(phi); a13 = -sin(phi);
+      a21 = sin(theta)*sin(phi); a22 = cos(theta)*sin(phi); a23 = cos(phi);
+      a31 = cos(theta);          a32 = -sin(theta);         a33 = 0.0;
+
+      br = B0s*pow(Rs/r, 4)*(3.0*pow(cos(theta), 2) - 1.0);
+      btheta = 2.0*B0s*pow(Rs/r, 4)*cos(theta)*sin(theta);
       bphi = 0.0;
 
-      B0[0] = br*sin(btheta)*cos(bphi) + 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);
-      B0[1] = br*sin(btheta)*sin(bphi) + 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);
-      B0[2] = br*cos(bphi) + (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);       
+      bx1 = br*a11 + btheta*a12;
+      bx2 = br*a21 + btheta*a22;
+      bx3 = br*a31 + btheta*a32;
+
+      B0[0] = bx1 + 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);
+      B0[1] = bx2 + 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);
+      B0[2] = bx3 + (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);       
 
     }
       
@@ -391,7 +414,16 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
   double rcs, rcp; 
   double kb, mp;
   double parker[3];
- 
+
+  double theta, phi;
+  double br, btheta, bphi;
+  double bx1, bx2, bx3;
+
+  double pole;
+  double a11, a12, a13;
+  double a21, a22, a23;
+  double a31, a32, a33;
+
   // - quantity | value | units.
 
   // - adiabatic index.
@@ -550,9 +582,36 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
         d->Vc[RHO][k][j][i] = RHs;
 #if PHYSICS == MHD
 #if BACKGROUND_FIELD == NO
-        EXPAND(d->Vc[BX1][k][j][i] = 3.0*x1[i]*x3[k]*B0s*pow(Rs, 3)*pow(rs, -5);,
-               d->Vc[BX2][k][j][i] = 3.0*x3[k]*x2[j]*B0s*pow(Rs, 3)*pow(rs, -5);,
-               d->Vc[BX3][k][j][i] = (3.0*x3[k]*x3[k] - rs*rs)*B0s*pow(Rs, 3)*pow(rs, -5);)
+
+        if (pole == 4){
+
+          r = sqrt(x1[i]*x1[i] + x2[j]*x2[j] + x3[k]*x3[k]);
+          theta = acos(x3[k]/r);
+          phi = atan2(x2[j], x1[i]);
+
+          a11 = sin(theta)*cos(phi); a12 = cos(theta)*cos(phi); a13 = -sin(phi);
+          a21 = sin(theta)*sin(phi); a22 = cos(theta)*sin(phi); a23 = cos(phi);
+          a31 = cos(theta);          a32 = -sin(theta);         a33 = 0.0;
+
+          br = B0s*pow(Rs/r, 4)*(3.0*pow(cos(theta), 2) - 1.0);
+          btheta = 2.0*B0s*pow(Rs/r, 4)*cos(theta)*sin(theta);
+          bphi = 0.0;
+
+          bx1 = br*a11 + btheta*a12;
+          bx2 = br*a21 + btheta*a22;
+          bx3 = br*a31 + btheta*a32;
+
+          EXPAND(d->Vc[BX1][k][j][i] = bx1;,
+                 d->Vc[BX2][k][j][i] = bx2;,
+                 d->Vc[BX3][k][j][i] = bx3;)
+
+        }else if (pole == 2){
+
+          EXPAND(d->Vc[BX1][k][j][i] = 3.0*x1[i]*x3[k]*B0s*pow(Rs, 3)*pow(rs, -5);,
+                 d->Vc[BX2][k][j][i] = 3.0*x3[k]*x2[j]*B0s*pow(Rs, 3)*pow(rs, -5);,
+                 d->Vc[BX3][k][j][i] = (3.0*x3[k]*x3[k] - rs*rs)*B0s*pow(Rs, 3)*pow(rs, -5);)
+
+        }
 #endif
 #if BACKGROUND_FIELD == YES
         EXPAND(d->Vc[BX1][k][j][i] = 0.0;,

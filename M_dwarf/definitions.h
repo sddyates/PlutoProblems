@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+#define  PHYSICS                 HD
+=======
 #define  PHYSICS                 MHD
+>>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
 #define  DIMENSIONS              3
 #define  COMPONENTS              3
 #define  GEOMETRY                CARTESIAN
@@ -14,9 +18,12 @@
 
 #define  EOS                     IDEAL
 #define  ENTROPY_SWITCH          NO
+<<<<<<< HEAD
+=======
 #define  DIVB_CONTROL            DIV_CLEANING
-#define  BACKGROUND_FIELD        YES
+#define  BACKGROUND_FIELD        NO
 #define  RESISTIVITY             NO
+>>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
 #define  THERMAL_CONDUCTION      NO
 #define  VISCOSITY               NO
 #define  ROTATING_FRAME          NO
@@ -53,6 +60,15 @@
 
 /* -- supplementary constants (user editable) -- */ 
 
+<<<<<<< HEAD
+#define  INITIAL_SMOOTHING   NO
+#define  WARNING_MESSAGES    YES
+#define  PRINT_TO_FILE       YES
+#define  INTERNAL_BOUNDARY   YES
+#define  SHOCK_FLATTENING    NO
+#define  CHAR_LIMITING       NO
+#define  LIMITER             VANLEER_LIM
+=======
 #define  INITIAL_SMOOTHING         NO
 #define  WARNING_MESSAGES          NO
 #define  PRINT_TO_FILE             YES
@@ -61,3 +77,5 @@
 #define  CHAR_LIMITING             NO
 #define  LIMITER                   VANLEER_LIM
 #define  ASSIGN_VECTOR_POTENTIAL   NO
+#define  UPDATE_VECTOR_POTENTIAL   NO
+>>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a

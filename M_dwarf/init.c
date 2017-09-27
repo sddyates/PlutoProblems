@@ -20,7 +20,6 @@ void ParkerVelocity(double *parker, double cs, double v_esc, double r,
 void Init (double *v, double x1, double x2, double x3)
 {
 
-  int nv;
   int i;
   double cs, rho, pre, omega, omega_fr;
   double Rs, v_esc, ga;
@@ -29,7 +28,12 @@ void Init (double *v, double x1, double x2, double x3)
   double P, RH, rc;
   double kb, mp, sphere;
   double parker[3];
+<<<<<<< HEAD
+  double a = 4.7*1.49597892e+11/UNIT_LENGTH;
+  double omega_orb = sqrt(UNIT_G*M/pow(a,3));
+=======
   double omega_orb;
+>>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
   double xp, yp, zp;
   double bx, by, bz;
   double bxp, byp, bzp;
@@ -120,13 +124,6 @@ void Init (double *v, double x1, double x2, double x3)
 #endif
 #endif
 
-    //for (nv = 0; nv < NVAR; nv++) {
-      //if (v[RHO] < 0.0) {
-        //printf("v[nv]=%e \n", v[nv]);
-      //}
-    //}
-
-
   } else if(r <= Rs && r > 0.5*Rs){
 
     EXPAND(v[VX1] = 0.0;,
@@ -159,23 +156,15 @@ void Init (double *v, double x1, double x2, double x3)
 #endif
 #endif
 #endif
-    //for (nv = 0; nv < NVAR; nv++) {
-      //if (v[RHO] < 0.0) {
-        //printf("v[nv]=%e \n", v[nv]);
-      //}
-    //}
 
   } else if (r > Rs){
 
     ParkerVelocity(parker, cs, v_esc, r, rc, Rs, RH, P);
-    //printf("parker[0] = %e, parker[1] = %e, parker[2] = %e, cs=%e, v_esc=%e, r=%e, rc=%e, Rs=%e, RH=%e, P=%e \n", parker[0], parker[1], parker[2], cs, v_esc, r, rc, Rs, RH, P);
     EXPAND(v[VX1] = sin(theta)*(parker[0]*cos(phi)+sin(phi)*r*(omega+omega));,
            v[VX2] = sin(theta)*(parker[0]*sin(phi)-cos(phi)*r*(omega+omega));,
            v[VX3] = parker[0]*cos(theta);)
     v[PRS] = parker[1];
     v[RHO] = parker[2];
-
-    //printf("vx1=%e, vx2=%e, vx3=%e \n", v[VX1], v[VX2], v[VX3]);
 
 #if PHYSICS == MHD
 #if BACKGROUND_FIELD == NO
@@ -201,32 +190,27 @@ void Init (double *v, double x1, double x2, double x3)
 #endif
 #endif
 #endif
-    //for (nv = 0; nv < NVAR; nv++) {
-      //if (v[RHO] < 0.0) {
-        //printf("v[nv]=%e \n", v[nv]);
-      //}
-    //}
 
   }
+<<<<<<< HEAD
+=======
 
-
-  /* 
+  int nv;
   for (nv = 0; nv < NVAR; nv++) {
-    if (isnan(v[nv]) || v[RHO] < 0.0) {
-      printf("parker[0] = %e, parker[1] = %e, parker[2] = %e, cs=%e, v_esc=%e, r=%e, rc=%e, Rs=%e, RH=%e, P=%e \n", parker[0], parker[1], parker[2], cs, v_esc, r, rc, Rs, RH, P);
+    if (isnan(v[nv])) {
       printf("x1=%e, x2=%e, x3=%e \n", x1, x2, x3);
       printf("v[RHO]=%e \n", v[RHO]);
       printf("v[PRS]=%e \n", v[PRS]);
       printf("v[VX1]=%e \n", v[VX1]);
       printf("v[VX2]=%e \n", v[VX2]);
-      //printf("v[VX3]=%e \n", v[VX3]);
+      printf("v[VX3]=%e \n", v[VX3]);
       printf("v[BX1]=%e \n", v[BX1]);
       printf("v[BX2]=%e \n", v[BX2]);
-      //printf("v[BX3]=%e \n", v[BX3]);
+      printf("v[BX3]=%e \n", v[BX3]);
     }
   }
-  */
 
+>>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
 }  
 
 /*================================================================================*/
@@ -273,7 +257,7 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
   if (r <= 0.5*R){
 #if DIMENSIONS == 2
     bx = 0.0;
-    by = Bs*16.0;
+    by = B0*16.0;
     bxp = bx*cos(beta) + by*sin(beta);;
     byp = -bx*sin(beta) + by*cos(beta);
     bzp = 0.0;
@@ -281,23 +265,23 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
 #if DIMENSIONS == 3
     bx = 0.0;
     by = 0.0;
-    bz = 16.0*Bs;
+    bz = 16.0*B0;
     bxp = bx*cos(beta) + bz*sin(beta);
     byp = by;
     bzp = -bx*sin(beta) + bz*cos(beta);
 #endif 
   } else if (r > 0.5*R) {
 #if DIMENSIONS == 2
-    bx = 3.0*xp*yp*Bs*pow(rp,-5);
-    by = (3.0*pow(yp,2)-pow(rp,2))*Bs*pow(rp,-5);
+    bx = 3.0*xp*yp*B0*pow(rp,-5);
+    by = (3.0*pow(yp,2)-pow(rp,2))*B0*pow(rp,-5);
     bxp = bx*cos(beta) + by*sin(beta);;
     byp = -bx*sin(beta) + by*cos(beta);
-    bzp = 0.0;
+    bzp
 #endif
 #if DIMENSIONS == 3
-    bx = 3.0*xp*zp*Bs*pow(rp,-5);
-    by = 3.0*yp*zp*Bs*pow(rp,-5);
-    bz = (3.0*pow(zp,2)-pow(rp,2))*Bs*pow(rp,-5);
+    bx = 3.0*xp*zp*B0*pow(rp,-5);
+    by = 3.0*yp*zp*B0*pow(rp,-5);
+    bz = (3.0*pow(zp,2)-pow(rp,2))*B0*pow(rp,-5);
     bxp = bx*cos(beta) + bz*sin(beta);
     byp = by;
     bzp = -bx*sin(beta) + bz*cos(beta);
@@ -327,7 +311,12 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
   double rc; 
   double kb, mp;
   double parker[3];
+<<<<<<< HEAD
+  double a = 4.7*1.49597892e+11/UNIT_LENGTH;
+  double omega_orb = sqrt(UNIT_G*M/pow(a,3));
+=======
   double omega_orb;
+>>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
   double xp, yp, zp;
   double bx, by, bz;
   double bxp, byp, bzp;
@@ -352,7 +341,11 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
   cs       = sqrt((2.0*kb*T)/mp)/UNIT_VELOCITY;
   P        = cs*cs*RH/g_gamma;
   rc = UNIT_G*M/(2.0*cs*cs);
+<<<<<<< HEAD
+  omega = omega_orb;//g_inputParam[Omega]*2.67e-6/t0;
+=======
   omega = g_inputParam[Omega]*2.67e-6*t0;
+>>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
   beta = 0.0;
   beta *= 0.0174532925;
 
@@ -360,6 +353,21 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
   x2 = grid[JDIR].xgc;
   x3 = grid[KDIR].xgc;
 
+<<<<<<< HEAD
+#if DIMENSIONS == 2
+  xp = x1[i]*cos(beta) - x2[j]*sin(beta);
+  yp = x1[i]*sin(beta) + x2[j]*cos(beta);
+#endif
+
+#if DIMENSIONS == 3
+  xp = x1[i]*cos(beta) - x3[k]*sin(beta);
+  yp = x2[j];
+  zp = x1[i]*sin(beta) + x3[k]*cos(beta);
+#endif
+
+  if (side == 0) {
+    TOT_LOOP(k,j,i){	
+=======
 
   if (side == 0) {
     TOT_LOOP(k,j,i){	
@@ -377,6 +385,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
 
       rp2 = EXPAND(xp*xp, + yp*yp, + zp*zp);
       rp = sqrt(xp*xp + yp*yp + zp*zp);
+>>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
 
       /* - Radial quantities - */
       r2 = EXPAND(x1[i]*x1[i],+x2[j]*x2[j],+x3[k]*x3[k]);
@@ -476,11 +485,11 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
         d->Vc[PRS][k][j][i] = g_smallPressure;
       }
 
-      /*     
+<<<<<<< HEAD
+=======
       int nv;
       for (nv = 0; nv < NVAR; nv++) {
-        if (isnan(d->Vc[nv][k][j][i]) || d->Vc[RHO][k][j][i] < 0.0) {
-          printf("parker[0] = %e, parker[1] = %e, parker[2] = %e, cs=%e, v_esc=%e, r=%e, rc=%e, Rs=%e, RH=%e, P=%e \n", parker[0], parker[1], parker[2], cs, v_esc, r, rc, R, RH, P);
+        if (isnan(d->Vc[nv][k][j][i])) {
           printf("x1=%e, x2=%e, x3=%e \n", x1[i], x2[j], x3[k]);
           printf("xp=%e, yp=%e, zp=%e \n", xp, yp, zp);
           printf("bx=%e, by=%e, bz=%e \n", bx, by, bz);
@@ -490,14 +499,14 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
           printf("d->Vc[PRS][k][j][i]=%e \n", d->Vc[PRS][k][j][i]);
           printf("d->Vc[VX1][k][j][i]=%e \n", d->Vc[VX1][k][j][i]);
           printf("d->Vc[VX2][k][j][i]=%e \n", d->Vc[VX2][k][j][i]);
-          //printf("d->Vc[VX3][k][j][i]=%e \n", d->Vc[VX3][k][j][i]);
+          printf("d->Vc[VX3][k][j][i]=%e \n", d->Vc[VX3][k][j][i]);
           printf("d->Vc[BX1][k][j][i]=%e \n", d->Vc[BX1][k][j][i]);
           printf("d->Vc[BX2][k][j][i]=%e \n", d->Vc[BX2][k][j][i]);
-          //printf("d->Vc[BX3][k][j][i]=%e \n", d->Vc[BX3][k][j][i]);
+          printf("d->Vc[BX3][k][j][i]=%e \n", d->Vc[BX3][k][j][i]);
         }
       }
-      */
 
+>>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
     }
   }
 }
@@ -513,14 +522,23 @@ void BodyForceVector(double *v, double *g, double x1, double x2, double x3)
   double Fcentr_s_x1, Fcentr_s_x2, Fcor_s_x1, Fcor_s_x2, Fin_s_x1, Fin_s_x2;
   double Fcentr_p_x1, Fcentr_p_x2, Fcor_p_x1, Fcor_p_x2, Fin_p_x1, Fin_p_x2;
   double Fin_x1, Fin_x2, gs, gp, gs_in, gp_in;
+<<<<<<< HEAD
+  double a = 4.7*1.49597892e+11/UNIT_LENGTH;
+  double omega_orb = sqrt(UNIT_G*M/pow(a,3));
+=======
   double omega_orb;
+>>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
 
   M = g_inputParam[M_star]*CONST_Msun/M0;
   RH = g_inputParam[RHO_star]/UNIT_DENSITY;
   R = 1.0;//g_inputParam[R_star]*CONST_Rsun/UNIT_LENGTH;
 
   // Rotational frequency (orbit and frame).
+<<<<<<< HEAD
+  omega = omega_orb;//g_inputParam[Omega]*2.67e-6/t0;
+=======
   omega = g_inputParam[Omega]*2.67e-6*t0;
+>>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
   // Distance from star.
   r2 = EXPAND(x1*x1, + x2*x2, + x3*x3);
   r = sqrt(r2);
@@ -595,7 +613,6 @@ void ParkerVelocity(double *parker, double cs, double v_esc, double r,
   parker[0] = cs*sqrt(psi);
   parker[1] = P*exp(lambda*(R/r-1.0)-0.5*pow(parker[0]/cs,2));
   parker[2] = (RH/P)*parker[1];
-
 }
 
 /*================================================================================*/
