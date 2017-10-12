@@ -70,3 +70,4 @@
 #define  CHAR_LIMITING             NO
 #define  LIMITER                   MINMOD_LIM
 #define  ASSIGN_VECTOR_POTENTIAL   NO
+#define  UPDATE_VECTOR_POTENTIAL   NO

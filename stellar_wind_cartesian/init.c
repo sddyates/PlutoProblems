@@ -38,7 +38,7 @@ void Init (double *v, double x1, double x2, double x3){
   Cs_p      = g_inputParam[Cs_P],
   Bq        = Bcgs/UNIT_B,                                                    
   v_esc     = sqrt(2.0*UNIT_G*M_star*(1.0-Edd)),                              
-  v_inf     = v_esc * sqrt((a/(1.0-a))),                                      
+  v_inf     = 3.0*v_esc,//v_esc * sqrt((a/(1.0-a))),                                      
   vv        = 0.0,
   Omega     = 0.0,
   x         = 0.0,
@@ -324,6 +324,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
   int i, j, k, p, o, l, m, n, ghost, phase, kprime, jprime;                                                               
 
   double vel_x1, vel_x2, vel_x3, vel_mag, vel_mag2;
+  double r_testx, r_testy;
 
   double Cs_p, Mratio, Lratio, T, mu, a, b, Q, a_eff, beta, Omega, shell, M_star;
   double Edd, L, c, M_dot, ke, Omega2, A, Bcgs, cs, Bq, v_esc, v_inf;
@@ -375,7 +376,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
   cs      = sqrt(UNIT_kB*T/(mu*(CONST_AH/UNIT_MASS)*CONST_amu));
   Bq      = Bcgs/UNIT_B;
   v_esc   = sqrt(2.0*UNIT_G*M_star*(1.0-Edd));
-  v_inf   = v_esc * sqrt((a/(1.0-a)));
+  v_inf   = 3.0*v_esc;//v_esc * sqrt((a/(1.0-a)));
 
   #if EOS == IDEAL
   g_gamma = 1.05;
@@ -450,26 +451,110 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
       d->Vc[PRS][k][j][i] = (d->Vc[RHO][k][j][i]*T/(KELVIN*mu));
       #endif
 
-      if(fabs(x1[i]) < 1.0 && fabs(x1[i+1]) > 1.0){
-      
+      for (l=1; l<2; l++){
+
+        // Upper right.
+        if (x1[i] > 0.0 && x2[j] > 0.0) {
+          r_testx = D_EXPAND(x1[i+l]*x1[i+l], + x2[j]*x2[j], + x3[k]*x3[k]);
+          r_testx = sqrt(r_testx);
+          r_testy = D_EXPAND(x1[i]*x1[i], + x2[j+l]*x2[j+l], + x3[k]*x3[k]);
+          r_testy = sqrt(r_testy);
+          if (r < 1.0 && r_testx > 1.0 && r_testy > 1.0) {
+            // these are the cells at the boundary.
+            D_EXPAND(vel_x1 = d->Vc[VX1][k][j][i+l];,
+                     vel_x2 = d->Vc[VX2][k][j+l][i];,
+                     vel_x3 = d->Vc[VX3][k][j][i];)   
+            vel_mag = sqrt(vel_x1*vel_x1 + vel_x2*vel_x2);
+          } else if (r < 1.0 && r_testx < 1.0 && r_testy > 1.0) {
+            D_EXPAND(vel_x1 = d->Vc[VX1][k][j][i];,
+                     vel_x2 = d->Vc[VX2][k][j+l][i];,
+                     vel_x3 = d->Vc[VX3][k][j][i];)          
+            vel_mag = sqrt(vel_x1*vel_x1 + vel_x2*vel_x2);
+          } else if (r < 1.0 && r_testx > 1.0 && r_testy < 1.0) {
+            D_EXPAND(vel_x1 = d->Vc[VX1][k][j][i+l];,
+                     vel_x2 = d->Vc[VX2][k][j][i];,
+                     vel_x3 = d->Vc[VX3][k][j][i];)          
+            vel_mag = sqrt(vel_x1*vel_x1 + vel_x2*vel_x2);
+          }
+        }
+
+        // Lower right.
+        else if (x1[i] > 0.0 && x2[j] < 0.0) {
+          r_testx = D_EXPAND(x1[i+l]*x1[i+l], + x2[j]*x2[j], + x3[k]*x3[k]);
+          r_testx = sqrt(r_testx);
+          r_testy = D_EXPAND(x1[i]*x1[i], + x2[j-l]*x2[j-l], + x3[k]*x3[k]);
+          r_testy = sqrt(r_testy);
+          if (r < 1.0 && r_testx > 1.0 && r_testy > 1.0) {
+            // these are the cells at the boundary.
+            D_EXPAND(vel_x1 = d->Vc[VX1][k][j][i+l];,
+                     vel_x2 = d->Vc[VX2][k][j-l][i];,
+                     vel_x3 = d->Vc[VX3][k][j][i];)          
+            vel_mag = sqrt(vel_x1*vel_x1 + vel_x2*vel_x2);
+          } else if (r < 1.0 && r_testx < 1.0 && r_testy > 1.0) {
+            D_EXPAND(vel_x1 = d->Vc[VX1][k][j][i];,
+                     vel_x2 = d->Vc[VX2][k][j-l][i];,
+                     vel_x3 = d->Vc[VX3][k][j][i];)          
+            vel_mag = sqrt(vel_x1*vel_x1 + vel_x2*vel_x2);
+          } else if (r < 1.0 && r_testx > 1.0 && r_testy < 1.0) {
+            D_EXPAND(vel_x1 = d->Vc[VX1][k][j][i+l];,
+                     vel_x2 = d->Vc[VX2][k][j][i];,
+                     vel_x3 = d->Vc[VX3][k][j][i];)          
+            vel_mag = sqrt(vel_x1*vel_x1 + vel_x2*vel_x2);
+          }
+        }
+        // lower left.
+        else if (x1[i] < 0.0 && x2[j] < 0.0) {
+          r_testx = D_EXPAND(x1[i-l]*x1[i-l], + x2[j]*x2[j], + x3[k]*x3[k]);
+          r_testx = sqrt(r_testx);
+          r_testy = D_EXPAND(x1[i]*x1[i], + x2[j-l]*x2[j-l], + x3[k]*x3[k]);
+          r_testy = sqrt(r_testy);
+          if (r < 1.0 && r_testx > 1.0 && r_testy > 1.0) {
+            // these are the cells at the boundary.
+            D_EXPAND(vel_x1 = d->Vc[VX1][k][j][i-l];,
+                     vel_x2 = d->Vc[VX2][k][j-l][i];,
+                     vel_x3 = d->Vc[VX3][k][j][i];)          
+            vel_mag = sqrt(vel_x1*vel_x1 + vel_x2*vel_x2);
+          } else if (r < 1.0 && r_testx < 1.0 && r_testy > 1.0) {
+            D_EXPAND(vel_x1 = d->Vc[VX1][k][j][i];,
+                     vel_x2 = d->Vc[VX2][k][j-l][i];,
+                     vel_x3 = d->Vc[VX3][k][j][i];)          
+            vel_mag = sqrt(vel_x1*vel_x1 + vel_x2*vel_x2);
+          } else if (r < 1.0 && r_testx > 1.0 && r_testy < 1.0) {
+            D_EXPAND(vel_x1 = d->Vc[VX1][k][j][i-l];,
+                     vel_x2 = d->Vc[VX2][k][j][i];,
+                     vel_x3 = d->Vc[VX3][k][j][i];)          
+            vel_mag = sqrt(vel_x1*vel_x1 + vel_x2*vel_x2);
+          }
+        }
+        // Upper left.
+        else if (x1[i] < 0.0 && x2[j] > 0.0) {
+          r_testx = D_EXPAND(x1[i-l]*x1[i-l], + x2[j]*x2[j], + x3[k]*x3[k]);
+          r_testx = sqrt(r_testx);
+          r_testy = D_EXPAND(x1[i]*x1[i], + x2[j+l]*x2[j+l], + x3[k]*x3[k]);
+          r_testy = sqrt(r_testy);
+          if (r < 1.0 && r_testx > 1.0 && r_testy > 1.0) {
+            // these are the cells at the boundary.
+            D_EXPAND(vel_x1 = d->Vc[VX1][k][j][i-l];,
+                     vel_x2 = d->Vc[VX2][k][j+l][i];,
+                     vel_x3 = d->Vc[VX3][k][j][i];)          
+            vel_mag = sqrt(vel_x1*vel_x1 + vel_x2*vel_x2);
+          } else if (r < 1.0 && r_testx < 1.0 && r_testy > 1.0) {
+            D_EXPAND(vel_x1 = d->Vc[VX1][k][j][i];,
+                     vel_x2 = d->Vc[VX2][k][j+l][i];,
+                     vel_x3 = d->Vc[VX3][k][j][i];)          
+            vel_mag = sqrt(vel_x1*vel_x1 + vel_x2*vel_x2);
+          } else if (r < 1.0 && r_testx > 1.0 && r_testy < 1.0) {
+            D_EXPAND(vel_x1 = d->Vc[VX1][k][j][i-l];,
+                     vel_x2 = d->Vc[VX2][k][j][i];,
+                     vel_x3 = d->Vc[VX3][k][j][i];)          
+            vel_mag = sqrt(vel_x1*vel_x1 + vel_x2*vel_x2);
+          }
+        }
       }
-
-      if(fabs(x2[j]) < 1.0 && fabs(x2[j+1]) < 1.0){
-        
-      }
-
-      vel_mag2 = D_EXPAND(d->Vc[VX1][k][j][i]*d->Vc[VX1][k][j][i], + 
-                          d->Vc[VX2][k][j][i]*d->Vc[VX2][k][j][i], +
-                          d->Vc[VX3][k][j][i]*d->Vc[VX3][k][j][i]);
-      vel_mag = sqrt(vel_mag2);
-
-      D_EXPAND(vel_x1 = 0.0;,
-               vel_x2 = 0.0;,
-               vel_x3 = 0.0;)
-
       D_EXPAND(d->Vc[VX1][k][j][i] = vel_mag*x1[i]/r;,                                                 
                d->Vc[VX2][k][j][i] = vel_mag*x2[j]/r;,                               
                d->Vc[VX3][k][j][i] = vel_mag*x3[k]/r;)
+      
 
       #if PHYSICS == MHD 
       #if BACKGROUND_FIELD == NO
