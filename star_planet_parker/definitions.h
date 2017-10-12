@@ -44,7 +44,7 @@
 #define  tyear                   3.15569e+7
 #define  tday                    8.64e+4
 #define  VTK_TIME_INFO           YES
-#define  VTK_VECTOR_DUMP         YES
+#define  VTK_VECTOR_DUMP         NO
 #define  GLM_EXTENDED            NO
 #define  CHOMBO_REF_VAR          RHO
 #define  PPM_ORDER               4

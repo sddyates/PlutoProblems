@@ -61,6 +61,8 @@ void Init (double *v, double x1, double x2, double x3){
   rb2       = 0.0,
   theta     = 0.0;
 
+  double vel_x1, vel_x2, vel_x3, vel_mag, vel_mag2;
+
   #if EOS == IDEAL
   g_gamma = 1.05;
   #endif
@@ -111,6 +113,7 @@ void Init (double *v, double x1, double x2, double x3){
              v[VX3] = vv*x3/r;)
 
     #if PHYSICS == MHD 
+    #if BACKGROUND_FIELD == NO
     #if DIMENSIONS == 2
 
     bx = 3.0*xp*yp*Bq*pow(rp,-5);
@@ -133,6 +136,7 @@ void Init (double *v, double x1, double x2, double x3){
            v[BX3] = bzp;)
     #endif
     #endif
+    #endif
 
   } else if (r > 0.5 && r <= 1.0) {
 
@@ -142,11 +146,18 @@ void Init (double *v, double x1, double x2, double x3){
     v[PRS] = (v[RHO]*T/(KELVIN*mu));
     #endif
 
-    D_EXPAND(v[VX1] = (cs/Cs_p)*x1/r;,                                                 
-             v[VX2] = (cs/Cs_p)*x2/r;,                               
-             v[VX3] = (cs/Cs_p)*x3/r;)
+    vel_mag = v_inf*pow(1.0 - (1.0/1.001),b);
+
+    D_EXPAND(vel_x1 = 0.0;,
+             vel_x2 = 0.0;,
+             vel_x3 = 0.0;)
+
+    D_EXPAND(v[VX1] = vel_mag*x1/r;,                                                 
+             v[VX2] = vel_mag*x2/r;,                               
+             v[VX3] = vel_mag*x3/r;)
 
     #if PHYSICS == MHD 
+    #if BACKGROUND_FIELD == NO
     #if DIMENSIONS == 2	
 
     bx = 3.0*xp*yp*Bq*pow(rp,-5);
@@ -169,6 +180,7 @@ void Init (double *v, double x1, double x2, double x3){
            v[BX3] = bzp;)
     #endif
     #endif
+    #endif
 
   } else if (r <= 0.5 ) {
 
@@ -183,6 +195,7 @@ void Init (double *v, double x1, double x2, double x3){
              v[VX3] = 0.0;)
 
     #if PHYSICS == MHD 
+    #if BACKGROUND_FIELD == NO
     #if DIMENSIONS == 2
     bx = 0.0;
     by = Bq*16.0;
@@ -204,12 +217,103 @@ void Init (double *v, double x1, double x2, double x3){
            v[BX3] = bzp;)
     #endif 
     #endif
+    #endif
 
   }     
 
 }                                                                          
 
 /*================================================================================*/
+
+
+/*================================================================================*/
+#if BACKGROUND_FIELD == YES
+void BackgroundField (double x1, double x2, double x3, double *B0)
+{ 
+
+  double x, y, z;
+  double xp, yp, zp;
+  double bx, by, bz;
+  double bxp, byp, bzp;
+  double r, r2, rp, rp2, rb, rb2;
+  double theta, beta, Bq, Bcgs;
+
+  Bcgs = g_inputParam[B_CGS];                                            
+  Bq = Bcgs/UNIT_B;
+  beta = g_inputParam[BB];
+
+  r2 = EXPAND(x1*x1,+x2*x2,+x3*x3);
+  r  = sqrt(r2);
+  beta *= 0.0174532925;
+
+  #if DIMENSIONS == 2
+  xp = x1*cos(beta) - x2*sin(beta);
+  yp = x1*sin(beta) + x2*cos(beta);
+  #endif
+
+  #if DIMENSIONS == 3
+  xp = x1*cos(beta) - x3*sin(beta);
+  yp = x2;
+  zp = x1*sin(beta) + x3*cos(beta);
+  #endif
+
+  rp2 = EXPAND(xp*xp, + yp*yp, + zp*zp);
+  rp = sqrt(rp2);
+
+  if (r <= 0.5 ) {
+
+    #if DIMENSIONS == 2
+    bx = 0.0;
+    by = Bq*16.0;
+    bxp = bx*cos(beta) + by*sin(beta);;
+    byp = -bx*sin(beta) + by*cos(beta);
+    B0[0] = bxp;
+    B0[1] = byp;
+    B0[2] = 0.0;
+    #endif
+    #if DIMENSIONS == 3
+    bx = 0.0;
+    by = 0.0;
+    bz = 16.0*Bq;
+    bxp = bx*cos(beta) + bz*sin(beta);
+    byp = by;
+    bzp = -bx*sin(beta) + bz*cos(beta);
+    B0[0] = bxp;
+    B0[1] = byp;
+    B0[2] = bzp;
+    #endif 
+
+  } else if (r > 0.5){ 
+
+    #if DIMENSIONS == 2	
+    bx = 3.0*xp*yp*Bq*pow(rp,-5);
+    by = (3.0*pow(yp,2)-pow(rp,2))*Bq*pow(rp,-5);
+    bxp = bx*cos(beta) + by*sin(beta);;
+    byp = -bx*sin(beta) + by*cos(beta);
+    B0[0] = bxp;
+    B0[1] = byp;
+    B0[2] = 0.0;
+    #endif
+    #if DIMENSIONS == 3
+    bx = 3.0*xp*zp*Bq*pow(rp,-5);
+    by = 3.0*yp*zp*Bq*pow(rp,-5);
+    bz = (3.0*pow(zp,2)-pow(rp,2))*Bq*pow(rp,-5);
+    bxp = bx*cos(beta) + bz*sin(beta);
+    byp = by;
+    bzp = -bx*sin(beta) + bz*cos(beta);
+    B0[0] = bxp;
+    B0[1] = byp;
+    B0[2] = bzp;
+    #endif
+
+  }
+
+}
+#endif
+/*================================================================================*/
+
+
+
 
 void Analysis (const Data *d, Grid *grid){}                               
 
@@ -218,6 +322,8 @@ void Analysis (const Data *d, Grid *grid){}
 void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {        
 
   int i, j, k, p, o, l, m, n, ghost, phase, kprime, jprime;                                                               
+
+  double vel_x1, vel_x2, vel_x3, vel_mag, vel_mag2;
 
   double Cs_p, Mratio, Lratio, T, mu, a, b, Q, a_eff, beta, Omega, shell, M_star;
   double Edd, L, c, M_dot, ke, Omega2, A, Bcgs, cs, Bq, v_esc, v_inf;
@@ -298,7 +404,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
     rp = sqrt(xp*xp + yp*yp + zp*zp);
 
     if (r <= 0.5 ) {
-/*
+
       d->Vc[RHO][k][j][i] = (M_dot/(4.0*CONST_PI*(cs/Cs_p)));
 
       #if EOS == IDEAL                                                              
@@ -310,6 +416,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
                d->Vc[VX3][k][j][i] = 0.0;)
 
       #if PHYSICS == MHD 
+      #if BACKGROUND_FIELD == NO
       #if DIMENSIONS == 2
       bx = 0.0;
       by = 16.0*Bq;
@@ -331,22 +438,41 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
              d->Vc[BX3][k][j][i] = bzp;)
       #endif 
       #endif
-*/
+      #endif
+
       d->flag[k][j][i] |= FLAG_INTERNAL_BOUNDARY;
 
     } else if (r > 0.5 && r <= 1.0) {
-/*      
+      
       d->Vc[RHO][k][j][i] = (M_dot/(4.0*CONST_PI*(cs/Cs_p)));
 
       #if EOS == IDEAL                                                              
       d->Vc[PRS][k][j][i] = (d->Vc[RHO][k][j][i]*T/(KELVIN*mu));
       #endif
 
-      D_EXPAND(d->Vc[VX1][k][j][i] = (cs/Cs_p)*x1[i]/r;,                                                 
-               d->Vc[VX2][k][j][i] = (cs/Cs_p)*x2[j]/r;,                               
-               d->Vc[VX3][k][j][i] = (cs/Cs_p)*x3[k]/r;)
+      if(fabs(x1[i]) < 1.0 && fabs(x1[i+1]) > 1.0){
+      
+      }
+
+      if(fabs(x2[j]) < 1.0 && fabs(x2[j+1]) < 1.0){
+        
+      }
+
+      vel_mag2 = D_EXPAND(d->Vc[VX1][k][j][i]*d->Vc[VX1][k][j][i], + 
+                          d->Vc[VX2][k][j][i]*d->Vc[VX2][k][j][i], +
+                          d->Vc[VX3][k][j][i]*d->Vc[VX3][k][j][i]);
+      vel_mag = sqrt(vel_mag2);
+
+      D_EXPAND(vel_x1 = 0.0;,
+               vel_x2 = 0.0;,
+               vel_x3 = 0.0;)
+
+      D_EXPAND(d->Vc[VX1][k][j][i] = vel_mag*x1[i]/r;,                                                 
+               d->Vc[VX2][k][j][i] = vel_mag*x2[j]/r;,                               
+               d->Vc[VX3][k][j][i] = vel_mag*x3[k]/r;)
 
       #if PHYSICS == MHD 
+      #if BACKGROUND_FIELD == NO
       #if DIMENSIONS == 2	
       bx = 3.0*xp*yp*Bq*pow(rp,-5);
       by = (3.0*pow(yp,2)-pow(rp,2))*Bq*pow(rp,-5);
@@ -368,23 +494,14 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
              d->Vc[BX3][k][j][i] = bzp;)
       #endif
       #endif
-*/
+      #endif
+
       d->flag[k][j][i] |= FLAG_INTERNAL_BOUNDARY;
 
-    } else if (r >= 1.0 && r <= shell) {
-
-      vv = v_inf*pow(1.0 - (1.0/r),b);
-      d->Vc[RHO][k][j][i] = (M_dot/(4.0*CONST_PI*vv*r2));
-      d->Vc[PRS][k][j][i] = (d->Vc[RHO][k][j][i]*T/(KELVIN*mu));
-      D_EXPAND(d->Vc[VX1][k][j][i] = vv*x1[i]/r;,
-               d->Vc[VX2][k][j][i] = vv*x2[j]/r;,
-               d->Vc[VX3][k][j][i] = vv*x3[k]/r;)
-      //d->flag[k][j][i] |= FLAG_INTERNAL_BOUNDARY;
-
-    }		
+    }
 
     /* - Radiative diriving calculation. - */
-    if (r > shell){
+    if (r > 1.0){
 
       /* - Determine infinitesimal radial distance dr - */
       Ntot = EXPAND(dx1[i],*dx2[j],*dx3[k]);
@@ -674,8 +791,21 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
 
 
 #if BODY_FORCE != NO
+#if CAK == YES
+void BodyForceVector(double *rubrik, double *v, double *g, double *x_box)
+{
+  double x1, x2, x3;
+  /*
+  x1 = *x_box[0][1][1][1];
+  x2 = *x_box[1][1][1][1];
+  x3 = *x_box[2][1][1][1];
+  */ 
+#endif
+#if CAK == NO
 void BodyForceVector(double *v, double *g, double x1, double x2, double x3)
 {
+#endif
+  
   double M_star, Edd, Omega, Mratio, Lratio;
   double r2, r, omega_fr, Omega_star;
   double Fin_x1, Fin_x2, gg, g_in;
