@@ -1,4 +1,4 @@
-#define  PHYSICS                 MHD
+#define  PHYSICS                 HD
 #define  DIMENSIONS              3
 #define  COMPONENTS              3
 #define  GEOMETRY                CARTESIAN
@@ -14,9 +14,6 @@
 
 #define  EOS                     IDEAL
 #define  ENTROPY_SWITCH          NO
-#define  DIVB_CONTROL            DIV_CLEANING
-#define  BACKGROUND_FIELD        NO
-#define  RESISTIVITY             NO
 #define  THERMAL_CONDUCTION      NO
 #define  VISCOSITY               NO
 #define  ROTATING_FRAME          NO
@@ -58,11 +55,10 @@
 
 /* -- supplementary constants (user editable) -- */ 
 
-#define  INITIAL_SMOOTHING         NO
-#define  WARNING_MESSAGES          NO
-#define  PRINT_TO_FILE             YES
-#define  INTERNAL_BOUNDARY         YES
-#define  SHOCK_FLATTENING          NO
-#define  CHAR_LIMITING             NO
-#define  LIMITER                   VANLEER_LIM
-#define  ASSIGN_VECTOR_POTENTIAL   NO
+#define  INITIAL_SMOOTHING   NO
+#define  WARNING_MESSAGES    NO
+#define  PRINT_TO_FILE       YES
+#define  INTERNAL_BOUNDARY   YES
+#define  SHOCK_FLATTENING    NO
+#define  CHAR_LIMITING       NO
+#define  LIMITER             VANLEER_LIM
