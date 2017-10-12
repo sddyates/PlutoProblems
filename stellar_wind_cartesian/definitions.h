@@ -56,18 +56,17 @@
 #define  PPM_ORDER               4
 #define  CHOMBO_REF_VAR          RHO
 #define  CAK                     NO
-#define  AMR                     NO
+#define  AMR_ON                  YES
 
 /* [End] user-defined constants (do not change this line) */
 
 /* -- supplementary constants (user editable) -- */ 
 
-#define  INITIAL_SMOOTHING         YES
+#define  INITIAL_SMOOTHING         NO
 #define  WARNING_MESSAGES          NO
 #define  PRINT_TO_FILE             NO
 #define  INTERNAL_BOUNDARY         YES
-#define  SHOCK_FLATTENING          YES
+#define  SHOCK_FLATTENING          NO
 #define  CHAR_LIMITING             NO
 #define  LIMITER                   MINMOD_LIM
 #define  ASSIGN_VECTOR_POTENTIAL   NO
-#define  UPDATE_VECTOR_POTENTIAL   NO

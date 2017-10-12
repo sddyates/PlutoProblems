@@ -711,7 +711,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
       sigma = (r/fabs(vr))*(dvdr)-1.0;
       f     = ((pow(1.0+sigma,1.0+a)-pow(1.0+sigma*nu2_c,1.0+a))/((1.0+a)*(1.0-nu2_c)*sigma*pow(1.0+sigma,a)));
 
-      #if AMR == YES
+      #if AMR_ON == YES
       #if DIMENSIONS == 3
       if (i < 4 || j < 4 || k < 4) {
         gL = 0.0;
@@ -733,7 +733,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
       #endif
       #endif
 
-      #if AMR == NO
+      #if AMR_ON == NO
       gL = (f*A*pow(r,-2)*pow(dvdr/B,a));
       #endif
       D_EXPAND(vx1[k][j][i] += (gL*x1[i]/r)*g_dt;,
