@@ -1,6 +1,6 @@
 #define  PHYSICS                 MHD
-#define  DIMENSIONS              2
-#define  COMPONENTS              2
+#define  DIMENSIONS              3
+#define  COMPONENTS              3
 #define  GEOMETRY                CARTESIAN
 #define  BODY_FORCE              VECTOR
 #define  COOLING                 NO
@@ -51,7 +51,7 @@
 #define  L_SUN                   3.846e+33
 #define  VTK_TIME_INFO           YES
 #define  VTK_VECTOR_DUMP         NO
-#define  GLM_EXTENDED            YES
+#define  GLM_EXTENDED            NO
 #define  CHOMBO_REF_VAR          RHO
 #define  PPM_ORDER               4
 #define  CHOMBO_REF_VAR          RHO
@@ -68,6 +68,6 @@
 #define  INTERNAL_BOUNDARY         YES
 #define  SHOCK_FLATTENING          NO
 #define  CHAR_LIMITING             NO
-#define  LIMITER                   MINMOD_LIM
+#define  LIMITER                   VANLEER_LIM
 #define  ASSIGN_VECTOR_POTENTIAL   NO
 #define  UPDATE_VECTOR_POTENTIAL   NO
