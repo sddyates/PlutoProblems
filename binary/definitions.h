@@ -1,6 +1,6 @@
 #define  PHYSICS                 HD
-#define  DIMENSIONS              3
-#define  COMPONENTS              3
+#define  DIMENSIONS              2
+#define  COMPONENTS              2
 #define  GEOMETRY                CARTESIAN
 #define  BODY_FORCE              VECTOR
 #define  COOLING                 NO
@@ -53,7 +53,6 @@
 #define  tyear                   3.15569e+7
 #define  tday                    8.64e+4
 #define  L_sun                   3.846e+33
-#define  VTK_VECTOR_DUMP         YES
 #define  GLM_EXTENDED            NO
 #define  CHOMBO_REF_VAR          RHO
 #define  CAK                     NO
