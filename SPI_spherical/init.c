@@ -295,9 +295,9 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
     bpx2 = bpx*cos(x2)*cos(x3) + bpy*cos(x2)*sin(x3) - bpz*sin(x2);
     bpx3 = -bpx*sin(x3)        + bpy*cos(x3);
 
-    B0[0] = 0.0;//bpx1;            
-    B0[1] = 0.0;//bpx2;                 
-    B0[2] = 0.0;//bpx3;
+    B0[0] = bpx1;            
+    B0[1] = bpx2;                 
+    B0[2] = bpx3;
 
   } else if (rp > 0.5*Rp && rp <= Rp) {
 
@@ -310,9 +310,9 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
     bpx2 = bpx*cos(x2)*cos(x3) + bpy*cos(x2)*sin(x3) - bpz*sin(x2);
     bpx3 = -bpx*sin(x3)        + bpy*cos(x3);
 
-    B0[0] = 0.0;//bpx1;            
-    B0[1] = 0.0;//bpx2;                 
-    B0[2] = 0.0;//bpx3;
+    B0[0] = bpx1;            
+    B0[1] = bpx2;                 
+    B0[2] = bpx3;
 
   } else if (rp > Rp) {
 
@@ -325,9 +325,9 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
     bpx2 = bpx*cos(x2)*cos(x3) + bpy*cos(x2)*sin(x3) - bpz*sin(x2);
     bpx3 = -bpx*sin(x3)        + bpy*cos(x3);
 
-    B0[0] = 0.0;//bpx1 + B0s*pow(x1, -3)*cos(x2);
-    B0[1] = 0.0;//bpx2 + (B0s/2.0)*pow(x1, -3)*sin(x2);
-    B0[2] = 0.0;//bpx3; 
+    B0[0] = bpx1 + B0s*pow(x1, -3)*cos(x2);
+    B0[1] = bpx2 + (B0s/2.0)*pow(x1, -3)*sin(x2);
+    B0[2] = bpx3; 
   } else {
     print("Error at x1=%f, x2=%f, x3=%f \n", x1, x2, x3);
   }
