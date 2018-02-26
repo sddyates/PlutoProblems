@@ -65,7 +65,7 @@
 #define  INITIAL_SMOOTHING         NO
 #define  WARNING_MESSAGES          NO
 #define  PRINT_TO_FILE             NO
-#define  INTERNAL_BOUNDARY         NO
+#define  INTERNAL_BOUNDARY         YES
 #define  SHOCK_FLATTENING          NO
 #define  CHAR_LIMITING             NO
 #define  LIMITER                   VANLEER_LIM
