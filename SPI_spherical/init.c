@@ -247,16 +247,19 @@ void Analysis (const Data *d, Grid *grid)
 void BackgroundField (double x1, double x2, double x3, double *B0)                                                    
 {                                                                                                                     
 
+  double a;
   double x, y, z;
   double xp, yp, zp;
-  double r, rp;
+  double rp, rp2;
 
   double bpx, bpy, bpz;
   double bpx1, bpx2, bpx3;
+  double bsx1, bsx2, bsx3;
 
   double Rp, B0p;
   double Rs, B0s;
 
+  a = g_inputParam[seperation]*214.9394693836;
   Rp = g_inputParam[planet_radius]*0.10045*CONST_Rsun/UNIT_LENGTH;                       
   Rs = g_inputParam[star_radius]*CONST_Rsun/UNIT_LENGTH;                         
 
@@ -292,9 +295,9 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
     bpx2 = bpx*cos(x2)*cos(x3) + bpy*cos(x2)*sin(x3) - bpz*sin(x2);
     bpx3 = -bpx*sin(x3)        + bpy*cos(x3);
 
-    B0[0] = bpx1;            
-    B0[1] = bpx2;                 
-    B0[2] = bpx3;
+    B0[0] = 0.0;//bpx1;            
+    B0[1] = 0.0;//bpx2;                 
+    B0[2] = 0.0;//bpx3;
 
   } else if (rp > 0.5*Rp && rp <= Rp) {
 
@@ -307,9 +310,9 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
     bpx2 = bpx*cos(x2)*cos(x3) + bpy*cos(x2)*sin(x3) - bpz*sin(x2);
     bpx3 = -bpx*sin(x3)        + bpy*cos(x3);
 
-    B0[0] = bpx1;            
-    B0[1] = bpx2;                 
-    B0[2] = bpx3;
+    B0[0] = 0.0;//bpx1;            
+    B0[1] = 0.0;//bpx2;                 
+    B0[2] = 0.0;//bpx3;
 
   } else if (rp > Rp) {
 
@@ -322,9 +325,11 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
     bpx2 = bpx*cos(x2)*cos(x3) + bpy*cos(x2)*sin(x3) - bpz*sin(x2);
     bpx3 = -bpx*sin(x3)        + bpy*cos(x3);
 
-    B0[0] = bpx1 + B0s*pow(x1, -3)*cos(x2);
-    B0[1] = bpx2 + (B0s/2.0)*pow(x1, -3)*sin(x2);
-    B0[2] = bpx3; 
+    B0[0] = 0.0;//bpx1 + B0s*pow(x1, -3)*cos(x2);
+    B0[1] = 0.0;//bpx2 + (B0s/2.0)*pow(x1, -3)*sin(x2);
+    B0[2] = 0.0;//bpx3; 
+  } else {
+    print("Error at x1=%f, x2=%f, x3=%f \n", x1, x2, x3);
   }
 
 }
@@ -432,7 +437,9 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
     if(box->vpos == CENTER){
       BOX_LOOP(box,k,j,i){ 
   
-        ParkerVelocity(parker, css, v_escs, x1[i], rcs, Rs, RHs, Ps);
+        ParkerVelocity(parker, css, v_escs, Rs, rcs, Rs, RHs, Ps);
+        
+
 /*
         if (vx1[k][j][ghost] > cs_star){
           EXPAND(vradial = cs_star;,
@@ -469,8 +476,8 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
 #endif
 #if BACKGROUND_FIELD == YES
         EXPAND(bx1[k][j][i] = 0.0;,
-               bx1[k][j][i] = 0.0;,
-               bx1[k][j][i] = 0.0;)
+               bx2[k][j][i] = 0.0;,
+               bx3[k][j][i] = 0.0;)
 #endif
 #endif                                                            
 

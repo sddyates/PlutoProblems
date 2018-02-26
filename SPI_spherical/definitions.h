@@ -15,7 +15,7 @@
 #define  EOS                     IDEAL
 #define  ENTROPY_SWITCH          NO
 #define  DIVB_CONTROL            DIV_CLEANING
-#define  BACKGROUND_FIELD        NO
+#define  BACKGROUND_FIELD        YES
 #define  RESISTIVITY             NO
 #define  THERMAL_CONDUCTION      NO
 #define  VISCOSITY               NO
@@ -65,7 +65,7 @@
 #define  INITIAL_SMOOTHING         NO
 #define  WARNING_MESSAGES          NO
 #define  PRINT_TO_FILE             NO
-#define  INTERNAL_BOUNDARY         YES
+#define  INTERNAL_BOUNDARY         NO
 #define  SHOCK_FLATTENING          NO
 #define  CHAR_LIMITING             NO
 #define  LIMITER                   VANLEER_LIM
