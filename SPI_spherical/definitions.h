@@ -1,5 +1,5 @@
 #define  PHYSICS                 MHD
-#define  DIMENSIONS              3
+#define  DIMENSIONS              2
 #define  COMPONENTS              3
 #define  GEOMETRY                SPHERICAL
 #define  BODY_FORCE              VECTOR
@@ -7,7 +7,7 @@
 #define  RECONSTRUCTION          LINEAR
 #define  TIME_STEPPING           RK2
 #define  DIMENSIONAL_SPLITTING   NO
-#define  NTRACER                 2
+#define  NTRACER                 1
 #define  USER_DEF_PARAMETERS     11
 
 /* -- physics dependent declarations -- */
@@ -15,7 +15,7 @@
 #define  EOS                     IDEAL
 #define  ENTROPY_SWITCH          NO
 #define  DIVB_CONTROL            DIV_CLEANING
-#define  BACKGROUND_FIELD        YES
+#define  BACKGROUND_FIELD        NO
 #define  RESISTIVITY             NO
 #define  THERMAL_CONDUCTION      NO
 #define  VISCOSITY               NO

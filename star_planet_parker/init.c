@@ -29,7 +29,7 @@ void Init (double *v, double x1, double x2, double x3)
   double kb, mp, sphere;
   double parker[3];
   double br, btheta, bphi, r, theta, phi;
-  int n_pole = 4, bx1, bx2, bx3, bp0, bp1, bp2;
+  int n_pole = 2, bx1, bx2, bx3, bp0, bp1, bp2;
 
   double a11, a12, a13;
   double a21, a22, a23;
@@ -273,7 +273,7 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
   double B0p, B0s, rs2, rs, rp2, rp, a, Rs, Rp;
   double br, btheta, bphi, r, theta, phi;
   double bx1, bx2, bx3;
-  int n_pole = 4;
+  int n_pole = 2;
 
   double a11, a12, a13;
   double a21, a22, a23;
@@ -419,7 +419,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
   double br, btheta, bphi;
   double bx1, bx2, bx3;
 
-  double pole;
+  double pole = 2;
   double a11, a12, a13;
   double a21, a22, a23;
   double a31, a32, a33;

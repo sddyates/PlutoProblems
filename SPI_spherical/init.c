@@ -149,7 +149,7 @@ void Init(double *v, double x1, double x2, double x3)
   }
 
   if (rp > Rp && rp <= 1.5*Rp){
-    v[TRC+1] = 1.0;
+    v[TRC] = 1.0;
   }
 
   // Set the density, pressure, velocity of the stellar wind 
@@ -165,17 +165,8 @@ void Init(double *v, double x1, double x2, double x3)
     v[RHO] = parker[2];
   }
 
-  if (rs > Rs && rs <= 1.5*Rs){
-    v[TRC] = 1.0;
-  }
-
 #if PHYSICS == MHD                                   
 #if BACKGROUND_FIELD == NO
-
-  // Star mangetic field.
-  bsx1 = B0s*pow(x1, -3)*cos(x2);
-  bsx2 = (B0s/2.0)*pow(x1, -3)*sin(x2);
-  bsx3 = 0.0;
 
   // Define Planet magnetic field in Cartesian.
   if (rp <= 0.5*Rp){
@@ -266,6 +257,7 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
   B0p = g_inputParam[planet_Bfield]/UNIT_B;                                           
   B0s = g_inputParam[star_Bfield]/UNIT_B;                                             
 
+
   // Convert to Cartesian centered on the star.
   x = x1*sin(x2)*cos(x3);
   y = x1*sin(x2)*sin(x3);
@@ -278,11 +270,6 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
   rp2 = EXPAND(xp*xp, + yp*yp, + zp*zp);
   rp = sqrt(rp2);
                                                                                                          
-  // Star mangetic field.
-  bsx1 = B0s*pow(x1, -3)*cos(x2);
-  bsx2 = (B0s/2.0)*pow(x1, -3)*sin(x2);
-  bsx3 = 0.0;
-
   // Define Planet magnetic field in Cartesian.
   if (rp <= 0.5*Rp){
 
@@ -328,6 +315,7 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
     B0[0] = bpx1 + B0s*pow(x1, -3)*cos(x2);
     B0[1] = bpx2 + (B0s/2.0)*pow(x1, -3)*sin(x2);
     B0[2] = bpx3; 
+
   } else {
     print("Error at x1=%f, x2=%f, x3=%f \n", x1, x2, x3);
   }
@@ -439,27 +427,6 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
   
         ParkerVelocity(parker, css, v_escs, Rs, rcs, Rs, RHs, Ps);
         
-
-/*
-        if (vx1[k][j][ghost] > cs_star){
-          EXPAND(vradial = cs_star;,
-                 vtheta = 0.0;,
-                 vphi = 0.0;)
-        } else if (vx1[k][j][ghost] < -cs_star){
-          EXPAND(vradial = -cs_star;,
-                 vtheta = 0.0;,
-                 vphi = 0.0;)
-        } else if (vx1[k][j][ghost] < fabs(cs_star)) {
-          EXPAND(vradial = 2.0*vx1[k][j][ghost] - vx1[k][j][ghost+1];,
-                 vtheta = 2.0*vx2[k][j][ghost] - vx2[k][j][ghost+1];,
-                 vphi = 0.0;)
-        }
-
-        EXPAND(vx1[k][j][i] = vradial;,
-               vx2[k][j][i] = vtheta;,
-               vx3[k][j][i] = vphi;)
-*/
-
         EXPAND(vx1[k][j][i] = parker[0];,
                vx2[k][j][i] = 0.0;,
                vx3[k][j][i] = 0.0;)
@@ -600,7 +567,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
       }
 
       if (rp > Rp && rp <= 1.5*Rp){
-        d->Vc[TRC+1][k][j][i] = 1.0;
+        d->Vc[TRC][k][j][i] = 1.0;
       }
 
     }
