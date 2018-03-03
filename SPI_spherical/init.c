@@ -43,6 +43,7 @@ void Init(double *v, double x1, double x2, double x3)
   double vx, vy, vz;
 
   double bpx, bpy, bpz;
+  double bsx, bsy, bsz;
   double bsx1, bsx2, bsx3;
   double bpx1, bpx2, bpx3;
 
@@ -210,9 +211,20 @@ void Init(double *v, double x1, double x2, double x3)
     bpx2 = bpx*cos(x2)*cos(x3) + bpy*cos(x2)*sin(x3) - bpz*sin(x2);
     bpx3 = -bpx*sin(x3)        + bpy*cos(x3);
 
-    EXPAND(v[BX1] = bpx1 + B0s*pow(x1, -3)*cos(x2);,            
-           v[BX2] = bpx2 + (B0s/2.0)*pow(x1, -3)*sin(x2);,                 
-           v[BX3] = bpx3;) 
+    bsx = 3.0*x*z*B0s*pow(Rs, 3)*pow(x1, -5);
+    bsy = 3.0*z*y*B0s*pow(Rs, 3)*pow(x1, -5);
+    bsz = (3.0*z*z - x1*x1)*B0s*pow(Rs, 3)*pow(x1, -5);
+
+    bsx1 = bsx*sin(x2)*cos(x3) + bsy*sin(x2)*sin(x3) + bsz*cos(x2);
+    bsx2 = bsx*cos(x2)*cos(x3) + bsy*cos(x2)*sin(x3) - bsz*sin(x2);
+    bsx3 = -bsx*sin(x3)        + bsy*cos(x3);
+
+    //B0s*pow(x1, -3)*cos(x2)
+    //(B0s/2.0)*pow(x1, -3)*sin(x2)
+
+    EXPAND(v[BX1] = bpx1 + bsx1;,            
+           v[BX2] = bpx2 + bsx2;,                 
+           v[BX3] = bpx3 + bsx3;) 
   }
     
 #endif
@@ -244,6 +256,7 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
   double rp, rp2;
 
   double bpx, bpy, bpz;
+  double bsx, bsy, bsz;
   double bpx1, bpx2, bpx3;
   double bsx1, bsx2, bsx3;
 
@@ -312,9 +325,17 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
     bpx2 = bpx*cos(x2)*cos(x3) + bpy*cos(x2)*sin(x3) - bpz*sin(x2);
     bpx3 = -bpx*sin(x3)        + bpy*cos(x3);
 
-    B0[0] = bpx1 + B0s*pow(x1, -3)*cos(x2);
-    B0[1] = bpx2 + (B0s/2.0)*pow(x1, -3)*sin(x2);
-    B0[2] = bpx3; 
+    bsx = 3.0*x*z*B0s*pow(Rs, 3)*pow(x1, -5);
+    bsy = 3.0*z*y*B0s*pow(Rs, 3)*pow(x1, -5);
+    bsz = (3.0*z*z - x1*x1)*B0s*pow(Rs, 3)*pow(x1, -5);
+
+    bsx1 = bsx*sin(x2)*cos(x3) + bsy*sin(x2)*sin(x3) + bsz*cos(x2);
+    bsx2 = bsx*cos(x2)*cos(x3) + bsy*cos(x2)*sin(x3) - bsz*sin(x2);
+    bsx3 = -bsx*sin(x3)        + bsy*cos(x3);
+
+    B0[0] = bpx1 + bsx1;
+    B0[1] = bpx2 + bsx2;
+    B0[2] = bpx3 + bsx3; 
 
   } else {
     print("Error at x1=%f, x2=%f, x3=%f \n", x1, x2, x3);
