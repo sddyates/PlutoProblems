@@ -1,5 +1,5 @@
 #define  PHYSICS                 MHD
-#define  DIMENSIONS              3
+#define  DIMENSIONS              2
 #define  COMPONENTS              3
 #define  GEOMETRY                SPHERICAL
 #define  BODY_FORCE              VECTOR
@@ -15,11 +15,11 @@
 #define  EOS                     IDEAL
 #define  ENTROPY_SWITCH          NO
 #define  DIVB_CONTROL            DIV_CLEANING
-#define  BACKGROUND_FIELD        NO
+#define  BACKGROUND_FIELD        YES
 #define  RESISTIVITY             NO
 #define  THERMAL_CONDUCTION      NO
 #define  VISCOSITY               NO
-#define  ROTATING_FRAME          YES
+#define  ROTATING_FRAME          NO
 
 /* -- user-defined parameters (labels) -- */
 
@@ -64,7 +64,7 @@
 
 #define  INITIAL_SMOOTHING         NO
 #define  WARNING_MESSAGES          NO
-#define  PRINT_TO_FILE             NO
+#define  PRINT_TO_FILE             YES
 #define  INTERNAL_BOUNDARY         YES
 #define  SHOCK_FLATTENING          NO
 #define  CHAR_LIMITING             NO
