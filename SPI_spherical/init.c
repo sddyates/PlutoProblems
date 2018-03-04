@@ -155,17 +155,29 @@ void Init(double *v, double x1, double x2, double x3)
 
   // Set the density, pressure, velocity of the stellar wind 
   // and stellar interiar.
-  if (rp > 10.0*Rp){
+  if(x1 <= Rs){
+
+    EXPAND(v[VX1] = 0.0;,
+           v[VX2] = 0.0;,
+           v[VX3] = 0.0;)
+    v[PRS] = Ps + (2.0/3.0)*CONST_PI*UNIT_G*RHs*RHs*(Rs*Rs-x1*x1);
+    v[RHO] = RHs;
+
+  } else if (x1 > Rs && rp > 10.0*Rp){
 
     ParkerVelocity(parker, css, v_escs, x1, rcs, Rs, RHs, Ps);
-    EXPAND(v[VX1] = parker[0];,
-           v[VX2] = 0.0;,
-           v[VX3] = -x1*sin(x2)*omega_orb;)
 
+    vx = sin(x2)*(parker[0]*cos(x3) + sin(x3)*x1*(omega_fr + omegas));
+    vy = sin(x2)*(parker[0]*sin(x3) - cos(x3)*x1*(omega_fr + omegas));
+    vz = parker[0]*cos(x2);
+
+    EXPAND(v[VX1] = vx*sin(x2)*cos(x3) + vy*sin(x2)*sin(x3) + vz*cos(x2);,
+           v[VX2] = vx*cos(x2)*cos(x3) + vy*cos(x2)*sin(x3) - vz*sin(x2);,
+           v[VX3] = -vx*sin(x3)        + vy*cos(x3);)
     v[PRS] = parker[1];
     v[RHO] = parker[2];
   }
-
+  
 #if PHYSICS == MHD                                   
 #if BACKGROUND_FIELD == NO
 
@@ -218,9 +230,6 @@ void Init(double *v, double x1, double x2, double x3)
     bsx1 = bsx*sin(x2)*cos(x3) + bsy*sin(x2)*sin(x3) + bsz*cos(x2);
     bsx2 = bsx*cos(x2)*cos(x3) + bsy*cos(x2)*sin(x3) - bsz*sin(x2);
     bsx3 = -bsx*sin(x3)        + bsy*cos(x3);
-
-    //B0s*pow(x1, -3)*cos(x2)
-    //(B0s/2.0)*pow(x1, -3)*sin(x2)
 
     EXPAND(v[BX1] = bpx1 + bsx1;,            
            v[BX2] = bpx2 + bsx2;,                 
@@ -604,13 +613,18 @@ void BodyForceVector(double *v, double *g, double x1, double x2, double x3)
 
   double x, y, z;
   double xp, yp, zp;
+  double gx1, gx2, gx3;
   double gpx, gpy, gpz;
   double gpx1, gpx2, gpx3; 
- 
-  double Ms, gs;
-  double Mp, gp;
-  double a, rp, rp2;
+  double Fin_x1, Fin_x2;
+  double vx, vy, vz;
 
+  double Ms, gs, gs_in;
+  double Mp, gp, gp_in;
+  double RHs, RHp, Rp, Rs;
+  double a, omega_orb, omega_fr, rp, rp2;
+
+  /*
   // Seperation.
   a = g_inputParam[seperation]*214.9394693836;
 
@@ -643,6 +657,63 @@ void BodyForceVector(double *v, double *g, double x1, double x2, double x3)
   g[IDIR] = gpx1 + gs;
   g[JDIR] = gpx2;
   g[KDIR] = gpx3;
+  */
+
+  Ms = g_inputParam[star_mass]*CONST_Msun/UNIT_MASS;
+  RHs = g_inputParam[star_surface_rho]/UNIT_DENSITY;
+  Rs = g_inputParam[star_radius]*CONST_Rsun/UNIT_LENGTH;
+  Mp = g_inputParam[planet_mass]*0.0009543*CONST_Msun/UNIT_MASS;
+  RHp = g_inputParam[planet_surface_rho]/UNIT_DENSITY;
+  Rp = g_inputParam[planet_radius]*0.10045*CONST_Rsun/UNIT_LENGTH;
+  a = g_inputParam[seperation]*214.9394693836;
+
+  // Rotational frequency (orbit and frame).
+  omega_orb = sqrt(UNIT_G*Ms/pow(a, 3));
+  omega_fr = omega_orb;
+
+  // Convert to Cartesian.
+  x = x1*sin(x2)*cos(x3);
+  y = x1*sin(x2)*sin(x3);
+  z = x1*cos(x2);
+  xp = x - a;
+  yp = y;
+  zp = z;
+  rp2 = EXPAND(xp*xp, + yp*yp, + zp*zp);
+  rp = sqrt(rp2);
+
+  // Gravity outside bodies.
+  gs = -UNIT_G*Ms/x1/x1;
+  gp = -UNIT_G*Mp/rp/rp;
+
+  // Gravity inside bodies.
+  gs_in = -(4.0/3.0)*CONST_PI*UNIT_G*RHs;     
+  gp_in = -(4.0/3.0)*CONST_PI*UNIT_G*RHp;
+
+  vx = v[VX1]*sin(x2)*cos(x3) + v[VX2]*cos(x2)*cos(x3) - v[VX3]*sin(x3);
+  vy = v[VX1]*sin(x2)*sin(x3) + v[VX2]*cos(x2)*sin(x3) + v[VX3]*cos(x3);
+  vz = v[VX1]*cos(x2)         - v[VX2]*sin(x2);
+
+  // Coriolis and centrifugal forces.
+  Fin_x1 = omega_fr*omega_fr*x + 2.0*omega_fr*vy;
+  Fin_x2 = omega_fr*omega_fr*y - 2.0*omega_fr*vx;
+
+  if (x1 > Rs && rp > Rp){ // External gravity + centrifugal + coriolis.
+    gx1 = gs*x/x1 + gp*xp/rp + Fin_x1;
+    gx2 = gs*y/x1 + gp*yp/rp + Fin_x2;
+    gx3 = gs*z/x1 + gp*zp/rp;
+  } else if (x1 < Rs) { // Star interal gravity.
+    gx1 = gs_in*x;
+    gx2 = gs_in*y;
+    gx3 = gs_in*z;
+  } else if (rp < Rp) { // Planet interal gravity.
+    gx1 = gp_in*xp;
+    gx2 = gp_in*yp;
+    gx3 = gp_in*zp;
+  }
+
+  g[IDIR] = gx1*sin(x2)*cos(x3) + gx2*sin(x2)*sin(x3) + gx3*cos(x2);
+  g[JDIR] = gx1*cos(x2)*cos(x3) + gx2*cos(x2)*sin(x3) - gx3*sin(x2);
+  g[KDIR] = -gx1*sin(x3)        + gx2*cos(x3);
 
 }
 
