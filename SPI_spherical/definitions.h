@@ -19,7 +19,7 @@
 #define  RESISTIVITY             NO
 #define  THERMAL_CONDUCTION      NO
 #define  VISCOSITY               NO
-#define  ROTATING_FRAME          NO
+#define  ROTATING_FRAME          YES
 
 /* -- user-defined parameters (labels) -- */
 
@@ -64,9 +64,10 @@
 
 #define  INITIAL_SMOOTHING         NO
 #define  WARNING_MESSAGES          NO
-#define  PRINT_TO_FILE             YES
+#define  PRINT_TO_FILE             NO
 #define  INTERNAL_BOUNDARY         YES
 #define  SHOCK_FLATTENING          NO
 #define  CHAR_LIMITING             NO
 #define  LIMITER                   VANLEER_LIM
 #define  ASSIGN_VECTOR_POTENTIAL   NO
+#define  UPDATE_VECTOR_POTENTIAL   NO

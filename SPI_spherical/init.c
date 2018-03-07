@@ -616,48 +616,11 @@ void BodyForceVector(double *v, double *g, double x1, double x2, double x3)
   double gx1, gx2, gx3;
   double gpx, gpy, gpz;
   double gpx1, gpx2, gpx3; 
-  double Fin_x1, Fin_x2;
-  double vx, vy, vz;
 
   double Ms, gs, gs_in;
   double Mp, gp, gp_in;
   double RHs, RHp, Rp, Rs;
   double a, omega_orb, omega_fr, rp, rp2;
-
-  /*
-  // Seperation.
-  a = g_inputParam[seperation]*214.9394693836;
-
-  // Convert to Cartesian.
-  x = x1*sin(x2)*cos(x3);
-  y = x1*sin(x2)*sin(x3);
-  z = x1*cos(x2);
-  xp = x - a;
-  yp = y;
-  zp = z;
-  rp2 = EXPAND(xp*xp, + yp*yp, + zp*zp);
-  rp = sqrt(rp2);
-
-  // Planet gravity vector in Cartesian.
-  Mp = g_inputParam[planet_mass]*0.0009543*CONST_Msun/UNIT_MASS;                                  
-  gp = -UNIT_G*Mp/rp/rp;
-  gpx = gp*xp/rp;
-  gpy = gp*yp/rp;
-  gpz = gp*zp/rp;
-
-  // Change Planet gravity vector basis form Cartesian to spherical.
-  gpx1 = gpx*sin(x2)*cos(x3) + gpy*sin(x2)*sin(x3) + gpz*cos(x2);
-  gpx2 = gpx*cos(x2)*cos(x3) + gpy*cos(x2)*sin(x3) - gpz*sin(x2);
-  gpx3 = -gpx*sin(x3) + gpy*cos(x3);
- 
-  // Star gravity.
-  Ms = g_inputParam[star_mass]*CONST_Msun/UNIT_MASS;
-  gs = -UNIT_G*Ms/x1/x1;
-
-  g[IDIR] = gpx1 + gs;
-  g[JDIR] = gpx2;
-  g[KDIR] = gpx3;
-  */
 
   Ms = g_inputParam[star_mass]*CONST_Msun/UNIT_MASS;
   RHs = g_inputParam[star_surface_rho]/UNIT_DENSITY;
@@ -689,17 +652,9 @@ void BodyForceVector(double *v, double *g, double x1, double x2, double x3)
   gs_in = -(4.0/3.0)*CONST_PI*UNIT_G*RHs;     
   gp_in = -(4.0/3.0)*CONST_PI*UNIT_G*RHp;
 
-  vx = v[VX1]*sin(x2)*cos(x3) + v[VX2]*cos(x2)*cos(x3) - v[VX3]*sin(x3);
-  vy = v[VX1]*sin(x2)*sin(x3) + v[VX2]*cos(x2)*sin(x3) + v[VX3]*cos(x3);
-  vz = v[VX1]*cos(x2)         - v[VX2]*sin(x2);
-
-  // Coriolis and centrifugal forces.
-  Fin_x1 = omega_fr*omega_fr*x + 2.0*omega_fr*vy;
-  Fin_x2 = omega_fr*omega_fr*y - 2.0*omega_fr*vx;
-
   if (x1 > Rs && rp > Rp){ // External gravity + centrifugal + coriolis.
-    gx1 = gs*x/x1 + gp*xp/rp + Fin_x1;
-    gx2 = gs*y/x1 + gp*yp/rp + Fin_x2;
+    gx1 = gs*x/x1 + gp*xp/rp;
+    gx2 = gs*y/x1 + gp*yp/rp;
     gx3 = gs*z/x1 + gp*zp/rp;
   } else if (x1 < Rs) { // Star interal gravity.
     gx1 = gs_in*x;
