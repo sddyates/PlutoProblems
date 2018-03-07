@@ -456,6 +456,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid) {
       dz = x3[k+1] - x3[k];
       dr2  = EXPAND(dx*dx,+dy*dy,+dz*dz);
       dr   = sqrt(dr2);
+      ddr = 0.9*dr;
 
       #if DIMENSIONS == 2
       if (r < 1.0 && r + 5.0*ddr > 1.0) {

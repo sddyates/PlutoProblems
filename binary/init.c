@@ -69,7 +69,7 @@ void Init (double *v, double x1, double x2, double x3)
     Rs_2    = (Rratio2*CONST_Rsun/UNIT_LENGTH),
     M_star2 = (Mratio2*CONST_Msun/UNIT_MASS),                                  
     Edd2    = (2.6e-5*(Lratio2)*(1.0/Mratio2)),                                 
-    L2      = (Lratio2*L_sun*UNIT_L),                                          
+    L2      = (Lratio2*L_sun/UNIT_L),                                          
     // Derive mass-loss rate and sound, escape, and terminal velocities
     // in code units.
     M_dot2  = pow(1.0+a_eff2,-(1.0/a_eff2)) * a_eff2 * pow(1.0-a_eff2,-1)*
@@ -100,18 +100,18 @@ void Init (double *v, double x1, double x2, double x3)
     // Set internal values.
     if (r1 <= Rs_1){
         v[RHO] = M_dot1/(4.0*CONST_PI*Rs_1*Rs_1*v01);
-        v[VX1] = 0.0;
-        v[VX2] = 0.0;
-        v[VX3] = 0.0;
+        EXPAND(v[VX1] = 0.0;,
+               v[VX2] = 0.0;,
+               v[VX3] = 0.0;)
         #if HAVE_ENERGY
         v[PRS] = (v[RHO]*T1/(KELVIN*mu1));
         #endif
     // Set external wind values for the star.
     } else if (r1 > Rs_1 && x1 > 0.0){
         v[RHO] = M_dot1/(4.0*CONST_PI*r1*r1*v01);
-        v[VX1] = v01*(x1-displace1)/r1;
-        v[VX2] = v01*x2/r1;
-        v[VX3] = v01*x3/r1;
+        EXPAND(v[VX1] = v01*(x1-displace1)/r1;,
+               v[VX2] = v01*x2/r1;,
+               v[VX3] = v01*x3/r1;)
         #if HAVE_ENERGY
         v[PRS] = (v[RHO]*T1/(KELVIN*mu1));
         #endif
@@ -134,18 +134,18 @@ void Init (double *v, double x1, double x2, double x3)
     // Set internal values.
     if (r2 <= Rs_2){
         v[RHO] = M_dot2/(4.0*CONST_PI*Rs_2*Rs_2*v02);
-        v[VX1] = 0.0;
-        v[VX2] = 0.0;
-        v[VX3] = 0.0;
+        EXPAND(v[VX1] = 0.0;,
+               v[VX2] = 0.0;,
+               v[VX3] = 0.0;)
         #if HAVE_ENERGY
         v[PRS] = (v[RHO]*T2/(KELVIN*mu2));
         #endif
     // Set external wind values for the star.
     } else if (r2 > Rs_2 && x1 < 0.0){
         v[RHO] = M_dot2/(4.0*CONST_PI*r2*r2*v02);
-        v[VX1] = v02*(x1-displace2)/r2;
-        v[VX2] = v02*x2/r2;
-        v[VX3] = v02*x3/r2;
+        EXPAND(v[VX1] = v02*(x1-displace2)/r2;,
+               v[VX2] = v02*x2/r2;,
+               v[VX3] = v02*x3/r2;)
         #if HAVE_ENERGY
         v[PRS] = (v[RHO]*T2/(KELVIN*mu2));
         #endif
@@ -162,6 +162,14 @@ void Init (double *v, double x1, double x2, double x3)
     #endif
     
 }
+
+/*================================================================================*/
+void Analysis (const Data *d, Grid *grid)
+{
+}
+/*================================================================================*/
+
+
 
 #if PHYSICS == MHD
 void BackgroundField (double x1, double x2, double x3, double *B0)
@@ -240,7 +248,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
     Rs_2    = (Rratio2*CONST_Rsun/UNIT_LENGTH),
     M_star2 = (Mratio2*CONST_Msun/UNIT_MASS),                                  
     Edd2    = (2.6e-5*(Lratio2)*(1.0/Mratio2)),                                 
-    L2      = (Lratio2*L_sun*UNIT_L),                                          
+    L2      = (Lratio2*L_sun/UNIT_L),                                          
     // Derive mass-loss rate and sound, escape, and terminal velocities
     // in code units.
     M_dot2  = pow(1.0+a_eff2,-(1.0/a_eff2)) * a_eff2 * pow(1.0-a_eff2,-1)*
@@ -298,9 +306,9 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
             // Move star to new x and y position.
             if (r1 <= Rs_1){
                 d->Vc[RHO][k][j][i] = M_dot1/(4.0*CONST_PI*Rs_1*Rs_1*v01);
-                d->Vc[VX1][k][j][i] = 0.0;
-                d->Vc[VX2][k][j][i] = 0.0;
-                d->Vc[VX3][k][j][i] = 0.0;
+                EXPAND(d->Vc[VX1][k][j][i] = 0.0;,
+                       d->Vc[VX2][k][j][i] = 0.0;,
+                       d->Vc[VX3][k][j][i] = 0.0;)
                 #if HAVE_ENERGY
                 d->Vc[PRS][k][j][i] = (d->Vc[RHO][k][j][i]*T1/(KELVIN*mu1));
                 #endif
@@ -311,8 +319,8 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
                 d->Vc[RHO][k][j][i] = M_dot1/(4.0*CONST_PI*r1*r1*v01);
                 d->Vc[PRS][k][j][i] = (d->Vc[RHO][k][j][i]*T1/(KELVIN*mu1)); 
                 EXPAND(d->Vc[VX1][k][j][i] = v01*(x1[i]-xs1)/r1;,
-   			               d->Vc[VX2][k][j][i] = v01*(x2[j]-ys1)/r1;,
-      	 	             d->Vc[VX3][k][j][i] = v01*x3[k]/r1;)
+                       d->Vc[VX2][k][j][i] = v01*(x2[j]-ys1)/r1;,
+                       d->Vc[VX3][k][j][i] = v01*x3[k]/r1;)
             }
 
             // -------------------------------------------------------------------------
@@ -342,7 +350,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
                 d->Vc[RHO][k][j][i] = M_dot2/(4.0*CONST_PI*Rs_2*Rs_2*v02);
                 d->Vc[VX1][k][j][i] = 0.0;
                 d->Vc[VX2][k][j][i] = 0.0;
-                d->Vc[VX3][k][j][i] = 0.0;
+                //d->Vc[VX3][k][j][i] = 0.0;
                 #if HAVE_ENERGY
                 d->Vc[PRS][k][j][i] = (d->Vc[RHO][k][j][i]*T2/(KELVIN*mu2));
                 #endif
@@ -352,9 +360,9 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
             if (r2 > Rs_2 && r2 < 2.0*Rs_2){
                 d->Vc[RHO][k][j][i] = M_dot2/(4.0*CONST_PI*r2*r2*v02); 
                 d->Vc[PRS][k][j][i] = (d->Vc[RHO][k][j][i]*T2/(KELVIN*mu1)); 
-   			        EXPAND(d->Vc[VX1][k][j][i] = v02*(x1[i]-xsp)/r2;,
-   			               d->Vc[VX2][k][j][i] = v02*(x2[j]-ysp)/r2;,
-      	 	             d->Vc[VX3][k][j][i] = v02*x3[k]/r2;)
+                EXPAND(d->Vc[VX1][k][j][i] = v02*(x1[i]-xsp)/r2;,
+                       d->Vc[VX2][k][j][i] = v02*(x2[j]-ysp)/r2;,
+                       d->Vc[VX3][k][j][i] = v02*x3[k]/r2;)
             }
             // -------------------------------------------------------------------------
 

@@ -29,7 +29,7 @@ void Init (double *v, double x1, double x2, double x3)
   double kb, mp, sphere;
   double parker[3];
   double br, btheta, bphi, r, theta, phi;
-  int n_pole = 2, bx1, bx2, bx3, bp0, bp1, bp2;
+  int n_pole = 4, bx1, bx2, bx3, bp0, bp1, bp2;
 
   double a11, a12, a13;
   double a21, a22, a23;
@@ -168,13 +168,13 @@ void Init (double *v, double x1, double x2, double x3)
              v[BX2] = 0.0;,
              v[BX3] = 16.0*B0p;) 
 
-    } else if (rp > 0.5*Rp && rp <= Rp) {
+    } else if (rp > 0.5*Rp && rp <= sphere*Rp) {
 
       EXPAND(v[BX1] = 3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);,
              v[BX2] = 3.0*x3*x2*B0p*pow(Rp, 3)*pow(rp, -5);,
              v[BX3] = (3.0*x3*x3 - rp*rp)*B0p*pow(Rp, 3)*pow(rp, -5);)
 
-    } else if (rs > Rs && rp > Rp) {
+    } else if (rs > Rs && rp > sphere*Rp) {
 
       EXPAND(v[BX1] = 3.0*x1*x3*B0s*pow(Rs, 3)*pow(rs, -5) + 
                3.0*(x1 - a)*x3*B0p*pow(Rp, 3)*pow(rp, -5);,
@@ -273,7 +273,7 @@ void BackgroundField (double x1, double x2, double x3, double *B0)
   double B0p, B0s, rs2, rs, rp2, rp, a, Rs, Rp;
   double br, btheta, bphi, r, theta, phi;
   double bx1, bx2, bx3;
-  int n_pole = 2;
+  int n_pole = 4;
 
   double a11, a12, a13;
   double a21, a22, a23;
@@ -419,7 +419,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
   double br, btheta, bphi;
   double bx1, bx2, bx3;
 
-  double pole = 2;
+  double pole;
   double a11, a12, a13;
   double a21, a22, a23;
   double a31, a32, a33;
@@ -575,9 +575,16 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
 
       } else if (rs > 0.5*Rs && rs <= Rs) {
 
-        EXPAND(d->Vc[VX1][k][j][i] = 0.0;,
-               d->Vc[VX2][k][j][i] = 0.0;,
-               d->Vc[VX3][k][j][i] = 0.0;)
+        ParkerVelocity(parker, css, v_escs, rs, rcs, Rs, RHs, Ps);
+        EXPAND(d->Vc[VX1][k][j][i] = sin(thetas)*(parker[0]*cos(phis)+sin(phis)*
+                                       rs*(omega_fr+omegas));,
+               d->Vc[VX2][k][j][i] = sin(thetas)*(parker[0]*sin(phis)-cos(phis)*
+                                       rs*(omega_fr+omegas));,
+               d->Vc[VX3][k][j][i] = parker[0]*cos(thetas);)
+
+        ///EXPAND(d->Vc[VX1][k][j][i] = 0.0;,
+        //       d->Vc[VX2][k][j][i] = 0.0;,
+        //       d->Vc[VX3][k][j][i] = 0.0;)
         d->Vc[PRS][k][j][i] = Ps + (2.0/3.0)*CONST_PI*UNIT_G*RHs*RHs*(Rs*Rs-rs*rs);
         d->Vc[RHO][k][j][i] = RHs;
 #if PHYSICS == MHD
@@ -621,7 +628,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
 #endif
         d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
 
-      } else if (rs > Rs && rs <= 1.5*Rs){
+      }/* else if (rs > Rs && rs <= 1.5*Rs){
 
         ParkerVelocity(parker, css, v_escs, rs, rcs, Rs, RHs, Ps);
         EXPAND(d->Vc[VX1][k][j][i] = sin(thetas)*(parker[0]*cos(phis)+sin(phis)*
@@ -631,14 +638,13 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
                d->Vc[VX3][k][j][i] = parker[0]*cos(thetas);)
         d->Vc[PRS][k][j][i] = parker[1];
         d->Vc[RHO][k][j][i] = parker[2];
-        d->Vc[TRC][k][j][i] = 1.0;
         //d->flag[k][j][i]   |= FLAG_INTERNAL_BOUNDARY;
 
-      }
+      }*/
 
-      if (rs > Rs && rs <= 1.5*Rs){
+      /*if (rs > Rs && rs <= 1.5*Rs){
         d->Vc[TRC][k][j][i] = 1.0;
-      }
+      }*/
 
       if (d->Vc[PRS][k][j][i] < g_smallPressure){
         d->Vc[PRS][k][j][i] = g_smallPressure;

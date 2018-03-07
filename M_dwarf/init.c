@@ -28,12 +28,6 @@ void Init (double *v, double x1, double x2, double x3)
   double P, RH, rc;
   double kb, mp, sphere;
   double parker[3];
-<<<<<<< HEAD
-  double a = 4.7*1.49597892e+11/UNIT_LENGTH;
-  double omega_orb = sqrt(UNIT_G*M/pow(a,3));
-=======
-  double omega_orb;
->>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
   double xp, yp, zp;
   double bx, by, bz;
   double bxp, byp, bzp;
@@ -192,8 +186,6 @@ void Init (double *v, double x1, double x2, double x3)
 #endif
 
   }
-<<<<<<< HEAD
-=======
 
   int nv;
   for (nv = 0; nv < NVAR; nv++) {
@@ -210,7 +202,6 @@ void Init (double *v, double x1, double x2, double x3)
     }
   }
 
->>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
 }  
 
 /*================================================================================*/
@@ -311,12 +302,6 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
   double rc; 
   double kb, mp;
   double parker[3];
-<<<<<<< HEAD
-  double a = 4.7*1.49597892e+11/UNIT_LENGTH;
-  double omega_orb = sqrt(UNIT_G*M/pow(a,3));
-=======
-  double omega_orb;
->>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
   double xp, yp, zp;
   double bx, by, bz;
   double bxp, byp, bzp;
@@ -341,11 +326,7 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
   cs       = sqrt((2.0*kb*T)/mp)/UNIT_VELOCITY;
   P        = cs*cs*RH/g_gamma;
   rc = UNIT_G*M/(2.0*cs*cs);
-<<<<<<< HEAD
-  omega = omega_orb;//g_inputParam[Omega]*2.67e-6/t0;
-=======
   omega = g_inputParam[Omega]*2.67e-6*t0;
->>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
   beta = 0.0;
   beta *= 0.0174532925;
 
@@ -353,7 +334,6 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
   x2 = grid[JDIR].xgc;
   x3 = grid[KDIR].xgc;
 
-<<<<<<< HEAD
 #if DIMENSIONS == 2
   xp = x1[i]*cos(beta) - x2[j]*sin(beta);
   yp = x1[i]*sin(beta) + x2[j]*cos(beta);
@@ -364,10 +344,6 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
   yp = x2[j];
   zp = x1[i]*sin(beta) + x3[k]*cos(beta);
 #endif
-
-  if (side == 0) {
-    TOT_LOOP(k,j,i){	
-=======
 
   if (side == 0) {
     TOT_LOOP(k,j,i){	
@@ -385,8 +361,6 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
 
       rp2 = EXPAND(xp*xp, + yp*yp, + zp*zp);
       rp = sqrt(xp*xp + yp*yp + zp*zp);
->>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
-
       /* - Radial quantities - */
       r2 = EXPAND(x1[i]*x1[i],+x2[j]*x2[j],+x3[k]*x3[k]);
       r  = sqrt(r2);
@@ -485,8 +459,6 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
         d->Vc[PRS][k][j][i] = g_smallPressure;
       }
 
-<<<<<<< HEAD
-=======
       int nv;
       for (nv = 0; nv < NVAR; nv++) {
         if (isnan(d->Vc[nv][k][j][i])) {
@@ -506,7 +478,6 @@ void UserDefBoundary (const Data *d, RBox *box, int side, Grid *grid)
         }
       }
 
->>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
     }
   }
 }
@@ -522,23 +493,14 @@ void BodyForceVector(double *v, double *g, double x1, double x2, double x3)
   double Fcentr_s_x1, Fcentr_s_x2, Fcor_s_x1, Fcor_s_x2, Fin_s_x1, Fin_s_x2;
   double Fcentr_p_x1, Fcentr_p_x2, Fcor_p_x1, Fcor_p_x2, Fin_p_x1, Fin_p_x2;
   double Fin_x1, Fin_x2, gs, gp, gs_in, gp_in;
-<<<<<<< HEAD
   double a = 4.7*1.49597892e+11/UNIT_LENGTH;
-  double omega_orb = sqrt(UNIT_G*M/pow(a,3));
-=======
-  double omega_orb;
->>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
 
   M = g_inputParam[M_star]*CONST_Msun/M0;
   RH = g_inputParam[RHO_star]/UNIT_DENSITY;
   R = 1.0;//g_inputParam[R_star]*CONST_Rsun/UNIT_LENGTH;
 
   // Rotational frequency (orbit and frame).
-<<<<<<< HEAD
-  omega = omega_orb;//g_inputParam[Omega]*2.67e-6/t0;
-=======
   omega = g_inputParam[Omega]*2.67e-6*t0;
->>>>>>> 2a648b26d5e1742168204fee99f8286cf364593a
   // Distance from star.
   r2 = EXPAND(x1*x1, + x2*x2, + x3*x3);
   r = sqrt(r2);
