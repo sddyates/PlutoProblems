@@ -1,5 +1,5 @@
 #define  PHYSICS                 MHD
-#define  DIMENSIONS              2
+#define  DIMENSIONS              3
 #define  COMPONENTS              3
 #define  GEOMETRY                SPHERICAL
 #define  BODY_FORCE              VECTOR
