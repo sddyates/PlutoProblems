@@ -251,6 +251,164 @@ void Init(double *v, double x1, double x2, double x3)
 void Analysis (const Data *d, Grid *grid)
 {
 
+  int    i, j, k;
+
+  double area, mass_loss_inner, mass_loss_outer, global;
+  double a, Ms, omega_orb, rot, mass_loss_inner_trac; 
+
+  //double AM_flux_x1, AM_flux_x2, AM_flux_x3;
+  //double AM_flux_tot_inner, AM_flux_tot_outer, AM_flux_tot_inner_trac;
+
+  double ***rho, ***prs;
+  double ***vx1, ***vx2, ***vx3;
+  double *dx1, *dx2, *dx3;
+  double *x1, *x2, *x3;
+
+  a = g_inputParam[seperation]*214.9394693836;
+  Ms = g_inputParam[star_mass]*CONST_Msun/UNIT_MASS;                                    
+  omega_orb = sqrt(UNIT_G*Ms/pow(a,3));
+
+  /* ---- Set pointer shortcuts ---- */
+  dx1 = grid[IDIR].dx;
+  dx2 = grid[JDIR].dx;
+  dx3 = grid[KDIR].dx;
+
+  x1 = grid[IDIR].x;
+  x2 = grid[JDIR].x;
+  x3 = grid[KDIR].x;
+
+  rho = d->Vc[RHO];
+  prs = d->Vc[PRS];
+  vx1 = d->Vc[VX1];
+  vx2 = d->Vc[VX2];
+  vx3 = d->Vc[VX3];
+
+  /* ---- Main loop ---- */
+
+  mass_loss_inner = 0.0;
+  mass_loss_outer = 0.0;  
+  mass_loss_inner_trac = 0.0;
+  //AM_flux_tot_inner = 0.0;
+  //AM_flux_tot_outer = 0.0;
+  //AM_flux_tot_inner_trac = 0.0;
+  global = 0.0;
+
+  DOM_LOOP(k,j,i){
+    if (i == IBEG+3){
+
+      // Mass-loss
+      area = pow(x1[i], 2)*sin(x2[j])*dx2[j]*dx3[k];
+      mass_loss_inner += area*vx1[k][j][i]*rho[k][j][i];
+
+      // Angular Momentum loss.
+      //rot = x1[i]*sin(x2[j])*omega_orb;
+      //AM_flux_x1 = 0.0;
+      //AM_flux_x2 = area*vx1[k][j][i]*rho[k][j][i]*x1[i]*(vx3[k][j][i] + rot);
+      //AM_flux_x3 = area*vx1[k][j][i]*rho[k][j][i]*x1[i]*vx2[k][j][i];
+      //AM_flux_tot_inner += sqrt(AM_flux_x1*AM_flux_x1 + 
+      //                          AM_flux_x2*AM_flux_x2 + 
+      //                          AM_flux_x3*AM_flux_x3);
+
+      if (d->Vc[TRC][k][j][i] > 0.9){
+        mass_loss_inner_trac += mass_loss_inner;
+        //AM_flux_tot_inner_trac += AM_flux_tot_outer;
+      }
+
+    }
+    if (i == IEND-3){
+
+      // Mass-loss
+      area = pow(x1[i], 2)*sin(x2[j])*dx2[j]*dx3[k];
+      mass_loss_outer += area*vx1[k][j][i]*rho[k][j][i];
+
+      // Angular Momentum loss.
+      //rot = x1[i]*sin(x2[j])*omega_orb;
+      //AM_flux_x1 = 0.0;
+      //AM_flux_x2 = area*vx1[k][j][i]*rho[k][j][i]*x1[i]*(vx3[k][j][i] + rot);
+      //AM_flux_x3 = area*vx1[k][j][i]*rho[k][j][i]*x1[i]*vx2[k][j][i];
+      //AM_flux_tot_outer += sqrt(AM_flux_x1*AM_flux_x1 + 
+      //                          AM_flux_x2*AM_flux_x2 + 
+      //                          AM_flux_x3*AM_flux_x3);
+
+    }
+  }
+
+  mass_loss_inner *= (UNIT_MASS/UNIT_TIME);
+  mass_loss_outer *= (UNIT_MASS/UNIT_TIME);
+
+  //AM_flux_tot_inner *= pow(UNIT_LENGTH, 2)*UNIT_MASS/pow(UNIT_TIME, 2);
+  //AM_flux_tot_outer *= pow(UNIT_LENGTH, 2)*UNIT_MASS/pow(UNIT_TIME, 2);
+
+  /* ---- Parallel data reduction ---- */
+  #ifdef PARALLEL
+  MPI_Allreduce(&mass_loss_inner, &global, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  mass_loss_inner = global;
+
+  MPI_Allreduce(&mass_loss_outer, &global, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  mass_loss_outer = global;
+
+  MPI_Allreduce(&mass_loss_inner_trac, &global, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  mass_loss_inner_trac = global;
+
+/*  MPI_Allreduce(&AM_flux_tot_inner, &global, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  AM_flux_tot_inner = global;
+
+  MPI_Allreduce(&AM_flux_tot_outer, &global, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  AM_flux_tot_outer = global;
+
+  MPI_Allreduce(&AM_flux_tot_inner_trac, &global, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+  AM_flux_tot_inner_trac = global;*/
+
+  MPI_Barrier (MPI_COMM_WORLD);
+  #endif
+
+  // Write ascii file "averages.dat" to disk.
+  if (prank == 0){
+
+    char  fname[512];
+    static double tpos = -1.0;
+    FILE *fp;
+
+    sprintf (fname, "%s/fluxing_quantities.dat", RuntimeGet()->output_dir);
+
+
+    if (g_stepNumber == 0){  // Open for writing only when we’re starting.
+      fp = fopen(fname, "w"); // from beginning.
+      fprintf (fp,"# %7s  %12s  %12s  %12s  %12s \n",//  %12s  %12s  %12s \n", 
+               "1) time [s]", 
+               "2) time step [s]", 
+               "3) mass-loss inner [g/s]", 
+               "4) mass-loss outer[g/s]", 
+               "5) mass-loss tracer[g/s]");/*, 
+               "6) angular momentum loss inner [cm**2*g/s**2]", 
+               "7) angular mom loss outer [cm**2*g/s**2]", 
+               "8) angular mom loss tracer [cm**2*g/s**2]");*/
+
+    }else{ // Append if this is not step 0.
+
+      if (tpos < 0.0){  // Obtain time coordinate of to last written row.
+        char   sline[512];
+        fp = fopen(fname,"r");
+        while (fgets(sline, 512, fp)) {}
+        sscanf(sline, "%lf\n",&tpos); // tpos = time of the last written row.
+        fclose(fp);
+      }
+      fp = fopen(fname,"a");
+    }
+    if (g_time > tpos){ // Write if current time if > tpos.
+      fprintf (fp, "%12.6e  %12.6e  %12.6e  %12.6e  %12.6e  \n",//  %12.6e  %12.6e  %12.6e \n", 
+               g_time*UNIT_TIME, 
+               g_dt*UNIT_TIME, 
+               mass_loss_inner, 
+               mass_loss_outer, 
+               mass_loss_inner_trac);/*, 
+               AM_flux_tot_inner, 
+               AM_flux_tot_outer, 
+               AM_flux_tot_inner_trac);*/
+    }
+    fclose(fp);
+  }
+
 }
 /*============================================================================*/
 
